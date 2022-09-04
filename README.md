@@ -1,1 +1,1 @@
-# intergap.githb.io
+# intergap.github.io
