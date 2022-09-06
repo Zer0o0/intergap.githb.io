@@ -10,7 +10,7 @@
 ############################
 
 # Name of website
-title: ~~Jian 间。
+title: ~~Jian 间
 
 # Your name to show in the footer
 author: Peng Yonglin
@@ -22,12 +22,13 @@ author: Peng Yonglin
 navbar-links:
   Home: "index"
   Resources:
+    - Time: "https://time.is/zh/"
     - Biostars: "https://www.biostars.org/"
     - Deepcode: "https://paperswithcode.com/sota"
-    - Rookie: "https://c.runoob.com/"
     - Movies: "https://cupfox.app/"
     - Wallpapers: "https://wallhaven.cc/"
-  Publications: "public"
+    - Xiangqi: "https://www.chessdb.cn/query/"
+  Publications: "publication"
   About Me: "aboutme"
 
 ################
