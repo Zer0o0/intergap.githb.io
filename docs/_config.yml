@@ -23,11 +23,10 @@ navbar-links:
   Home: "index"
   Resources:
     - Time: "https://time.is/zh/"
-    - Biostars: "https://www.biostars.org/"
-    - Deepcode: "https://paperswithcode.com/sota"
     - Movies: "https://cupfox.app/"
     - Wallpapers: "https://wallhaven.cc/"
     - Xiangqi: "https://www.chessdb.cn/query/"
+    - More...: "moresource"
   Publications: "publication"
   About Me: "aboutme"
 
