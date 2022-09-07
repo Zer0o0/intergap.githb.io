@@ -55,7 +55,7 @@
   </div>
   {% if page.music %}
   <audio id="player" controls preload autoplay loop>
-    <source src="{{ '/assets/audio/silence_voice.mp3' | relative_url }}" type="audio/mpeg">
+    <source src="{{ page.music | relative_url }}" type="audio/mpeg">
     Your browser does not support this audio format.
   </audio>
   {% endif %}

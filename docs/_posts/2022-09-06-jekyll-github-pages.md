@@ -69,7 +69,7 @@ beautiful-jekyll写作文档（md
 
 ### GitHub Pages 展示
 
-GitHub Pages 可以用来展示一些开源项目、主持博客甚或分享个人简历等。完成站点构建后，将站点根目录推送至GitHub仓库，并设置Pages后即能展示。详见[Pages文档](https://docs.github.com/cn/pages/setting-up-a-github-pages-site-with-jekyll/creating-a-github-pages-site-with-jekyll)。
+GitHub Pages 可以用来展示一些开源项目、主持博客甚或分享个人简历等。完成站点构建后，将站点根目录推送至GitHub仓库，并设置Pages后即能展示。详见[Pages文档](https://docs.github.com/cn/pages/setting-up-a-github-pages-site-with-jekyll/creating-a-github-pages-site-with-jekyll)。要注意的是仓库名需要以.github.io作为后缀。
 
 ### 美化
 
