@@ -80,11 +80,11 @@ GitHub Pages 可以用来展示一些开源项目、主持博客甚或分享个�
 src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 </iframe>
 
-2.audio元素
-<audio controls loop>
-    <source src="path_to_music" type="audio/mpeg">
-    Your browser does not support this audio format.
-</audio>
+2.audio元素，结合css控制播放按钮的样式
+ <audio  id="player" controls loop>
+   <source src="https://zer0o0.github.io/intergap.github.io/assets/audio/silence_voice.mp3" type="audio/mpeg">
+   Your browser does not support this audio format.
+ </audio>
 
 ### 参考
 [GitHub Pages指南](https://docs.github.com/cn/pages/quickstart)  
