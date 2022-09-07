@@ -54,8 +54,8 @@
     </div>
   </div>
   {% if page.music %}
-  <audio  id="player" controls preload autoplay loop>
-    <source src="https://zer0o0.github.io/intergap.github.io/assets/audio/silence_voice.mp3" type="audio/mpeg">
+  <audio id="player" controls preload autoplay loop>
+    <source src="{{ '/assets/audio/silence_voice.mp3' | relative_url }}" type="audio/mpeg">
     Your browser does not support this audio format.
   </audio>
   {% endif %}
