@@ -1118,3 +1118,8 @@ pre {
     display: inline-block;
   }
 }
+
+#player {
+  width: 20%;
+  opacity: 0.6;
+}
