@@ -4,6 +4,7 @@ title: Jekyll+GitHub Pages搭建个人博客
 tags: [website, blog]
 cover-img: /assets/img/covers/technology01.png
 thumbnail-img: /assets/img/mds/octojekyllx.png
+music: /assets/audio/friendships.mp3
 ---
 
 Jekyll是一个静态网站生成器，基于Ruby语言实现。它能够将一定格式的文本文件（如：MarkDown）转换成静态的HTML页面，并提供Liquid模板引擎进行页面渲染；生成的静态网站可以发布到GitHub Pages等网站托管，从而实现自己的项目页面或者个人博客等。此外，Jekyll有丰富的三方开源的个性化、多用途主题。
@@ -66,6 +67,7 @@ beautiful-jekyll写作文档（md
 |tags|List of tags to categorize the post. Separate the tags with commas and place them inside square brackets. Example: [personal, analysis, finance]|
 |cover-img|Include a large full-width image at the top of the page. You can either provide the path to a single image (eg. "/path/to/img") , or a list of images to cycle through (eg. ["/path/img1", "/path/img2"]). If you want to add a caption to an image, then you must use the list notation (use [] even if you have only one image), and each image should be provided as "/path/to/img" : "Caption of image".|
 |thumbnail-img|For blog posts, if you want to add a thumbnail that will show up in the feed, use thumbnail-img: /path/to/image. If no thumbnail is provided, then cover-img will be used as the thumbnail. You can use thumbnail-img: "" to disable a thumbnail.|
+|music|页面音乐，仅在含cover-image的页面生效，需要提供音乐路径如："/path/to/music"|
 
 ### GitHub Pages 展示
 
