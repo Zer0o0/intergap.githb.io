@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 一次Hisat2+featureCounts+DESeq的RNA-seq分析流程
+title: 一次Hisat2+featureCounts+DESeq的RNA-seq分析记录
 tags: [RNA-seq, toolkits, pipline]
 cover-img: /assets/img/covers/sanger_seq.png
 thumbnail-img: /assets/img/mds/volcano_plot.png
@@ -8,7 +8,17 @@ thumbnail-img: /assets/img/mds/volcano_plot.png
 
 在过去的十年中，RNA 测序 (RNA-seq) 成为了全转录组分析差异基因表达和mRNA差异剪接的重要工具。随着下一代测序技术的发展，RNA-seq方法已经被广泛用于研究RNA生物学的许多不同领域，包括单细胞基因表达、翻译和RNA结构等。另外，例如空间转录组学（spatialomics）等一些新兴的应用也正在探索之中。结合新的长读长和直接RNA-seq技术以及用于数据分析的更好的计算工具的开发，RNA-seq的创新将有助于更全面地了解RNA生物学，包括转录发生的时间和位置，以及RNA功能调控问题等。
 
-RNA-seq的常规分析流程主要包括：1）建库测序，获取reads；2）对reads进行质控；3）去除接头和低质量碱基；4）将reads比对回参考基因组；5）统计reads数表征基因表达水平；6）基因差异表达分析或者联合多组学分析；7）基因功能富集分析等。常用工具如下：
+RNA-seq的常规分析流程主要包括：
+
+- 建库测序，获取reads；
+- 对reads进行质控；
+- 去除接头和低质量碱基；
+- 将reads比对回参考基因组；
+- 统计reads数表征基因表达水平；
+- 基因差异表达分析或者联合多组学分析；
+- 基因功能富集分析等。
+
+常用工具如下：
 
 1. 质控
 [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)、[fastp](https://github.com/OpenGene/fastp)、[RSeQC](http://rseqc.sourceforge.net/)等
