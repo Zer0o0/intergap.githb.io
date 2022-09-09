@@ -2,7 +2,7 @@
 layout: post
 title: 一次Hisat2+featureCounts+DESeq的RNA-seq分析流程
 tags: [RNA-seq, toolkits, pipline]
-cover-img: /assets/img/mds/sanger_seq.png
+cover-img: /assets/img/covers/sanger_seq.png
 thumbnail-img: /assets/img/mds/volcano_plot.png
 ---
 
@@ -171,3 +171,133 @@ rule featurecounts:
 ```
 
 ### 差异表达分析
+
+使用R包DESeq2进行差异分析，
+```
+library(tidyverse)
+
+setwd('featurecounts')
+
+#合并featurecounts结果
+files <- list.files(pattern = '.count.txt$')
+files
+counts_d <- NULL
+for (i in files){
+  d <- read_tsv(i,skip = 1)
+  n <- str_sub(i,end=-11)
+  n2 <- paste0(n,'_fpkm')
+  d <- select(d,c(1,6,7))
+  colnames(d) <- c('geneid','length',n)
+  N <- sum(d[,n])
+  d[,n2] <- round(10^9*d[,n]/(d[,'length']*N),2)
+  # d <- mutate(d,fpkm=round(10^9*d[,n]/(d[,'length']*N),2))#计算fpkm
+  # colnames(d) <- c('geneid','length',n,n2)
+  #colnames 无法改名？？，
+  if (length(counts_d)==0){
+    counts_d <- d
+  }else{
+    counts_d <- merge(counts_d,d,by=c('geneid','length'))
+  }
+}
+head(counts_d)
+write.table(counts_d,'expr_of_rnaseq.txt',sep='\t',row.names = F)
+
+#相关性分析
+corr_d <- counts_d[,c(4,6,8,10)]  #取fpkm值做相关性分析，注意样本数量
+x <- rowSums(corr_d)
+corr_d <- corr_d[x>0,]
+
+# library(ggcorrplot)
+
+# corr <- round(cor(log2(corr_d+1)),2)
+# ggcorrplot(
+#   corr,
+#   hc.order = TRUE,
+#   # type = "lower",
+#   outline.color = "white",
+#   ggtheme = ggplot2::theme_gray,
+#   colors = c("#6D9EC1", "white", "#E46726"),
+#   lab=TRUE
+# )
+# ggsave('corrplot.jpg',width = 14,height = 14,dpi = 300,units = 'cm')
+
+library(GGally)
+
+ggpairs(log2(corr_d+1),columnLabels=c('ctrl_#1','treat_#1','ctrl_#2','treat_#2'))+theme_bw()
+ggsave('pairsplot.jpg',width = 14,height = 14,dpi = 300,units = 'cm')
+
+## 基因差异表达分析
+library(DESeq2)
+cts <- counts_d%>%select(1,3,5,7,9) # 基因表达矩阵，基因名作为行名，样本名作为列名，至少有2个重复
+rownames(cts) <- cts$geneid
+cts$geneid <- NULL
+design <- data.frame(
+  sample = colnames(cts),
+  condition = c("ctrl", "treat", "ctrl", "treat"),
+  batch = c("I", "I", "II", "II")
+) #设置批次，去除批次效应
+coldata <- data.frame(row.names = design$sample, condition = factor(design$condition), batch = factor(design$batch))
+dds <- DESeqDataSetFromMatrix(cts, colData = coldata, design = ~ batch + condition) # 去除批次效应~batch+condition
+dds$condition <- factor(dds$condition, levels = c("treat", "ctrl")) # 设置比较方向，如treat-ctrl
+dds <- DESeq(dds)
+
+# PCA 分析及可视化
+vsd <- vst(dds, blind = FALSE)
+plotPCA(vsd, "condition")
+assay(vsd) <- limma::removeBatchEffect(assay(vsd), vsd$batch)
+plotPCA(vsd, "condition")  #观察去除批次效应后的效果
+# pcaData <- plotPCA(vsd, ntop = 2000, intgroup = "condition", returnData = TRUE)
+# percentVar <- round(100 * attr(pcaData, "percentVar"))
+# pcaData %>%
+#   ggplot(aes(PC1, PC2, color = condition)) +
+#   geom_point(size = 5) +
+#   geom_text(aes(label = name)) +
+#   scale_color_manual(values = c("darkred", "darkblue")) +
+#   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+#   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+#   theme_base()
+
+# 差异表达分析
+res <- results(dds, contrast = c("condition", "treat", "ctrl"))
+res <- res[order(res$pvalue), ]
+res <- na.omit(as.data.frame(res))
+res$geneid <- rownames(res)
+
+# 定义显著性阈值，筛选差异表达分析
+p <- log10(0.05) * (-1)
+fc <- log2(2)
+degs <- res %>%
+  select(geneid, log2FoldChange, pvalue, padj) %>%
+  mutate(logp = log10(pvalue) * (-1)) %>%
+  mutate(type = if_else(logp > p, if_else(log2FoldChange > fc, "Up", if_else(log2FoldChange < (-fc), "Down", "N.s")), "N.s"))
+table(degs$type)
+write.table(degs, "degs_of_rnaseq.txt", row.names = F, sep='\t')
+
+# 火山图可视化
+degs %>%
+  filter(log2FoldChange < 10) %>%
+  filter(logp < 50) %>%
+  ggplot(aes(log2FoldChange, logp)) +
+  geom_point(aes(colour = type), alpha = 0.8, size = 0.8) +
+  scale_colour_manual(values = c("#3C5488FF", "grey", "#DC0000FF")) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  # geom_vline(xintercept = c(-fc, fc), linetype = 2) +  #添加指示线
+  # geom_hline(yintercept = p * (-1), linetype = 2) +
+  scale_x_continuous(breaks = seq(-4, 4, 2), labels = seq(-4, 4, 2), limits = c(-5, 5)) +
+  labs(x = quote(log[2] ~ FoldChange), y = quote(-log[10] ~ pvalue), colour = "") +
+  theme_light() +
+  theme(
+    panel.border = element_rect(colour = "black"),
+    axis.ticks = element_line(colour = "black"),
+    axis.text = element_text(colour = "black", size = 14),
+    axis.title = element_text(size = 14),
+    legend.key.height = unit(0.4, "cm"), legend.key.width = unit(0.4, "cm")
+  )
+ggsave("vocalno.jpg", width = 10, height = 8, dpi = 1200, units = "cm")
+
+```
+
+### 功能富集分析
+
+---
+缅怀毛主席逝世46周年·1976年9月9日至2022年9月9日 💮🕯🕯🕯
