@@ -2,7 +2,7 @@
 layout: post
 title: 使用seqkit和bedtools从基因组序列文件中提取片段
 tags: [sequence, toolkits]
-thumbnail-img: /assets/img/mds/luding0907.png
+thumbnail-img: /assets/img/mds/DNA_sequence.png
 ---
 
 fasta和fastq是两种存储核酸序列（DNA、RNA）或者蛋白质序列（AA）的文件格式，是众多生物信息分析的基础文件。在[NGS Analysis](https://learn.gencore.bio.nyu.edu/)中有对两种格式的详细说明。目前处理两种文件的工具有[seqkit](https://bioinf.shenwei.me/seqkit/)、[seqtk](https://github.com/lh3/seqtk)，以及一些python包，如[pyfastx](https://pyfastx.readthedocs.io/en/latest/)等。
