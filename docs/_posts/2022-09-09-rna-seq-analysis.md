@@ -181,7 +181,22 @@ rule featurecounts:
 
 ### 差异表达分析
 
-使用R包DESeq2进行差异分析，
+- 使用Cufflinks-cuffdiff进行差异分析，
+
+```
+cuffdiff [options]* transcripts.gtf \
+sample1_replicate1.sam[,…,sample1_replicateM.sam] \
+sample2_replicate1.sam[,…,sample2_replicateM.sam] … \
+sampleN.sam_replicate1.sam[,…,sample2_replicateM.sam]
+
+#[options]*可设置为：
+--library-type fr-firststrand --min-reps-for-js-test M --labels sample1,sample2,...,sampleN -p 12
+```
+
+*需要注意，差异倍数计算方向是输入文件的后者-前者，如sample2-sample1，可以对照实际表达值校对*
+
+- 使用R包DESeq2进行差异分析，
+
 ```R
 library(tidyverse)
 
@@ -339,8 +354,8 @@ show_col(mypal)
 go <- read_tsv('RESULT_OF_DAVID')
 
 p <- go %>%
-  slice(1:10)  #选取前10个term
-  mutate(logp=log10(PValue) * (-1)，,Percentage=`%`)%>%   
+  slice(1:10) %>% #选取前10个term
+  mutate(logp=log10(PValue) * (-1),Percentage=`%`)%>%   
   separate(col=Term,into=c('ID','Term'),sep=':')%>%  #提取term，KEGG为~，GO为:
   separate(Term,into=c('first','rest'),sep = 1)%>%
   mutate(first_=lapply(first, str_to_upper))%>%
