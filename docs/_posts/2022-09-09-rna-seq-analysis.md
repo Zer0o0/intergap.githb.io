@@ -31,13 +31,13 @@ RNA-seq的常规分析流程主要包括：
 5. 差异分析：
 [Cufflinks-cuffdiff](https://github.com/cole-trapnell-lab/cufflinks)、[DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)、[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)、[edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
 6. 功能富集分析：
-[DAVID](https://david.ncifcrf.gov/home.jsp)、[GSEA](https://www.gsea-msigdb.org/gsea/index.jsp)、[Enrichr](https://maayanlab.cloud/Enrichr/)、[panther](http://pantherdb.org/)、[GREAT](http://bejerano.stanford.edu/great/public/html/)、[clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html)等
+[DAVID](https://david.ncifcrf.gov/home.jsp)、[GSEA](https://www.gsea-msigdb.org/gsea/index.jsp)、[Enrichr](https://maayanlab.cloud/Enrichr/)、[panther](http://pantherdb.org/)、[clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html)等
 
 [Snakemake](https://snakemake.readthedocs.io/en/stable/)是基于Python语言实现的一个工作流管理系统，用于创建可重复和可扩展的数据分析流程的工具。Snakemake 可以根据分析所需软件描述，自动部署到任何执行环境。此外，可以无缝扩展到服务器、集群、网格和云环境，无需修改工作流定义。
 
 ### reads数据处理
 
-如下为基于Snakemake定义的RNA-seq分析流程，使用了Hisat2+featureCounts+DESeq2的组合工具，针对双端测序（pair-end）使用：
+如下为基于Snakemake定义的RNA-seq分析流程，使用了Hisat2+featureCounts+DESeq2的组合工具，对双端测序（pair-end）数据使用，命令行运行 *snakemake -s snakefile --cores 12 --keep-going*：
 ```
 ###################
 # Genome files #
@@ -121,7 +121,7 @@ rule hisat2:
     output:
         bam="alignment/{sample}.bam",
         summary="alignment/{sample}.summary"
-    threads: 24
+    threads: 12
     params:
         index=genome_index,
         splice="alignment/{sample}.splice.txt",
@@ -138,7 +138,7 @@ rule filter:
         "alignment/{sample}.bam"
     output:
         "alignment/{sample}.filter.sorted.bam"
-    threads: 16
+    threads: 12
     log:
         "alignment/logs/{sample}.filter.log"
     shell:
