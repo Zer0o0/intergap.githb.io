@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 一次Hisat2+featureCounts+DESeq的RNA-seq分析记录
+title: 一次Hisat2+featureCounts+DESeq2的RNA-seq分析记录
 tags: [RNA-seq, toolkits, pipline]
 cover-img: /assets/img/covers/sanger_seq.png
 thumbnail-img: /assets/img/mds/volcano_plot.png
@@ -307,6 +307,83 @@ ggsave("vocalno.jpg", width = 10, height = 8, dpi = 1200, units = "cm")
 ```
 
 ### 功能富集分析
+
+- DAVID结果气泡图展示
+
+```
+library(tidyverse)  #数据输入和变换
+library(stringr)
+library(openxlsx)  #打开Excel
+
+library(ggthemes)  #图形主题
+library(hrbrthemes)
+library(ggpubr)
+
+library(RColorBrewer)  #图形色彩
+library(ggsci)
+library(scico)
+library(viridis)
+library(viridisLite)
+library(scales)
+
+library(ggbreak)  #打断坐标轴
+library(ggpointdensity)  #点密度图
+
+library(pheatmap)  #热图
+
+mypal <- pal_npg("nrc",alpha = 0.6)(4)  #颜色选择
+show_col(mypal)
+
+go <- read_tsv('RESULT_OF_DAVID')
+
+p <- go %>%
+  slice(1:10)  #选取前10个term
+  mutate(logp=log10(PValue) * (-1)，,Percentage=`%`)%>%   
+  separate(col=Term,into=c('ID','Term'),sep=':')%>%  #提取term，KEGG为~，GO为:
+  separate(Term,into=c('first','rest'),sep = 1)%>%
+  mutate(first_=lapply(first, str_to_upper))%>%
+  unite("Term",first_,rest,sep='')%>%  #term的首个字母转变为大写
+  arrange(Count)%>%
+  mutate(Term=str_wrap(Term,70))%>%  #长度过长的term换行，每行至多70个字符
+  mutate(Term2=factor(Term,levels = Term))%>%
+  ggplot(aes(x = Count, y =Term2 , size = Percentage, colour = logp)) +
+  geom_point() +
+  scale_colour_gradient(low = "#788BDA", high = "#2E629F",breaks=c(2,4,6)) + ## 渐变色方向
+  scale_size_continuous(range = c(2, 5),breaks=c(1,2,3)) +
+  scale_x_continuous(breaks = c(3,6,9), labels = c(3,6,9),limits = c(2,10)) +
+  labs(y = "", colour = quote(-log[10] ~ pvalue), size = "Percentage") + ## 注意下标的标识方法
+  theme_light() +
+  theme(
+    panel.border = element_rect(colour = "black"),
+    axis.ticks = element_line(colour = "black"),
+    axis.text = element_text(colour = "black", size = 14),
+    axis.title = element_text(size = 14),
+    legend.key.height = unit(0.4, "cm"), legend.key.width = unit(0.4, "cm")
+  )
+p
+ggsave(paste0("RESULT_OF_DAVID", ".jpg"), egg::set_panel_size(p, width=unit(2.6, "cm"), height=unit(7, "cm")),height = 10, width = 21, units = "cm", dpi = 1200)  #egg::set_panel_size定义绘图区大小，同一批次图片保持一致
+```
+
+- 带误差线的柱状图
+
+```
+data <- read_tsv(filename)
+data %>%
+  pivot_longer(cols = rep1:rep3, names_to = "rep") %>%  # 数据转形为长型数据
+  group_by(group, time) %>%
+  summarise(mean = mean(value), sd = sd(value), .groups = "drop") %>%
+  mutate(time2 = factor(time, levels = c("G0/G1", "S", "G2/M")), group2 = factor(group, levels = c("NC", "KD"))) %>%
+  ggplot(aes(x = time2, y = mean, fill = group2)) +
+  geom_bar(stat = "identity", position = "dodge", colour = "black", width = 0.8, show.legend = F) +
+  geom_signif(map_signif_level = TRUE, y_position = c(54, 84), xmin = c(0.8, 1.8), xmax = c(1.2, 2.2), tip_length = 0.02, annotations = "***", textsize = 3, size = 0.4, vjust = 0.2) +
+  scale_fill_manual(values = mycol, name = "") +
+  geom_errorbar(aes(ymin = mean, ymax = mean + sd), width = 0.3, position = position_dodge(0.8)) +
+  ylim(0, 100) +
+  theme_pubr() +
+  labs(x = "", y = "Percent of Cell Number (%)", title = "") +
+  theme(axis.title = element_text(size = 10))
+ggsave("cell_cycle.jpg", width = 6, height = 6, units = "cm", dpi = 1200)
+```
 
 ---
 缅怀毛主席逝世46周年·1976年9月9日至2022年9月9日 💮🕯🕯🕯
