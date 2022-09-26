@@ -38,7 +38,7 @@ RNA-seq的常规分析流程主要包括：
 ### reads数据处理
 
 如下为基于Snakemake定义的RNA-seq分析流程，使用了Hisat2+featureCounts+DESeq2的组合工具，针对双端测序（pair-end）使用：
-```
+```R
 ###################
 # Genome files #
 genome_index="/home/user/genomes/hisat2Index/hg38/genome"  #参考基因组
@@ -182,7 +182,7 @@ rule featurecounts:
 ### 差异表达分析
 
 使用R包DESeq2进行差异分析，
-```
+```R
 library(tidyverse)
 
 setwd('featurecounts')
@@ -278,7 +278,9 @@ fc <- log2(2)
 degs <- res %>%
   select(geneid, log2FoldChange, pvalue, padj) %>%
   mutate(logp = log10(pvalue) * (-1)) %>%
-  mutate(type = if_else(logp > p, if_else(log2FoldChange > fc, "Up", if_else(log2FoldChange < (-fc), "Down", "N.s")), "N.s"))
+  mutate(type = if_else(logp > p, if_else(log2FoldChange > fc, "Up", if_else(log2FoldChange < (-fc), "Down", "N.s")), "N.s")) %>%
+  arrange(type)
+
 table(degs$type)
 write.table(degs, "degs_of_rnaseq.txt", row.names = F, sep='\t')
 
@@ -310,7 +312,7 @@ ggsave("vocalno.jpg", width = 10, height = 8, dpi = 1200, units = "cm")
 
 - DAVID结果气泡图展示
 
-```
+```R
 library(tidyverse)  #数据输入和变换
 library(stringr)
 library(openxlsx)  #打开Excel
@@ -366,7 +368,7 @@ ggsave(paste0("RESULT_OF_DAVID", ".jpg"), egg::set_panel_size(p, width=unit(2.6,
 
 - 带误差线的柱状图
 
-```
+```R
 data <- read_tsv(filename)
 data %>%
   pivot_longer(cols = rep1:rep3, names_to = "rep") %>%  # 数据转形为长型数据
