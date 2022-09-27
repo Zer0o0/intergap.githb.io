@@ -43,7 +43,7 @@ RNA-seq的常规分析流程主要包括：
 
 如下为基于Snakemake定义的RNA-seq分析流程，使用了Hisat2+featureCounts+DESeq2的组合工具，对双端测序（pair-end）数据使用，命令行运行 *snakemake -s snakefile --cores 12 --keep-going*：
 
-```python
+```
 ###################
 # Genome files #
 genome_index="/home/user/genomes/hisat2Index/hg38/genome"  #参考基因组

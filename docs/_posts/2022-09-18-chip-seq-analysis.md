@@ -48,7 +48,7 @@ ChIP-seq的一般分析过程包括：
 
 基于Snakemake定义的RNA-seq分析流程，使用了Bowtie2+deepTools的组合工具，针对双端测序（pair-end）使用：
 
-```python
+```
 ###################
 # Genome files #
 genome_index="/home/user/genomes/bowtie2Index/mm10/DNA/genome"
