@@ -33,13 +33,13 @@ zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") {if($7=="+
 
 - 提取序列
 
-1. 基因区域（TSS-500bp to TES+500bp）
+1、 基因区域（TSS-500bp to TES+500bp）
 
 ```shell
 seqkit subseq --gtf mm10_ENCFF871VGR_gene.gtf  -u 500 -d 500 mm10_no_alt_analysis_set_ENCODE.fasta | seqkit sort -l --quiet > mm10_ENCFF871VGR_gene_u500_d500.fa
 ```
 
-1. 启动子区域（TSS-500bp to TSS+100bp）
+2、 启动子区域（TSS-500bp to TSS+100bp）
 
 ```shell
 seqkit subseq --gtf mm10_ENCFF871VGR_promoter.gtf mm10_no_alt_analysis_set_ENCODE.fasta |seqkit seq -u > mm10_ENCFF871VGR_promoter.seqkit.fa

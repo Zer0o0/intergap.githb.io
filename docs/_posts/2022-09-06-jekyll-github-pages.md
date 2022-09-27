@@ -13,16 +13,16 @@ Jekyll是一个静态网站生成器，基于Ruby语言实现。它能够将一�
 
 以Windows 10为例，搭建Jekyll网站：
 
-1. 安装Jekyll依赖  
+1、 安装Jekyll依赖  
 下载和安装[Ruby](https://rubyinstaller.org/downloads/)，注意安装时将Ruby添加到系统环境变量。
 
-1. 安装jekyll和bundler gems
+2、 安装jekyll和bundler gems
 
 ```shell
 gem install jekyll bundler
 ```
 
-1. 创建新站点
+3、 创建新站点
 
 ```shell
 jekyll new myblog, 将会在运行目录中生成myblog目录，作为站点根目录  
@@ -44,14 +44,14 @@ jekyll new --skip-bundle ., 将以运行目录作为站点根目录
 **_data:** 目录，数据文件(支持YAML、JSON、CSV)  
 **assets:** 目录，存放静态文件(包括CSS、JS、images等)  
 
-1. 安装站点依赖的库文件，即Gemfile的配置
+4、 安装站点依赖的库文件，即Gemfile的配置
 
 ```shell
 bundle add webrick  #Ruby版本3.0.0或以上需要运行此处
 bundle install
 ```
 
-1. 本地站点测试
+5、 本地站点测试
 
 ```shell
 bundle exec jekyll serve

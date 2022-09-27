@@ -47,7 +47,8 @@ ChIP-seq的一般分析过程包括：
 ### reads数据处理
 
 基于Snakemake定义的RNA-seq分析流程，使用了Bowtie2+deepTools的组合工具，针对双端测序（pair-end）使用：
-```
+
+```python
 ###################
 # Genome files #
 genome_index="/home/user/genomes/bowtie2Index/mm10/DNA/genome"
@@ -285,7 +286,7 @@ rule plotcorrelation:
 
 ### 使用MACS2 callpeak以及Homer注释peak
 
-```
+```shell
 #callpeak
 macs2 callpeak -f BAMPE -t CHIP.bam -c INPUT.bam --outdir PATH_TO_OUTDIR -n PRE_NAME -g mm|hs -p 0.01;  #sharp-peak，-p保留peak的阈值
 macs2 callpeak -f BAMPE -t CHIP.bam -c INPUT.bam --outdir PATH_TO_OUTDIR -n PRE_NAME -g mm|hs -p 1e-5 --broad --broad-cutoff 0.01  #broad-peak，-p设置不同的值，将会影响broad-peak的pz值
@@ -309,6 +310,7 @@ findMotifsGenome.pl peakfile.bed /mnt/d/ubuntu/genomes/mouse/mm10.fa motif_homer
 ### 饼图展示Homer注释的peak分布情况
 
 这里要注意Homer注释的文件说明，  
+
 1) The first determines the distance to the nearest TSS and assigns the peak to that gene.  
 2) The second determines the genomic annotation of the region occupied by the center of the peak/region.  
 也就是说，Distance to TSS和Annotation 两列的信息不完全一致，分别对应以上两步骤的对应基因。
@@ -416,5 +418,3 @@ ggsave(paste0(f, ".png"), width = 10, height = 10, units = "cm", dpi = 1200)
 ---
 
 铭记九一八事变·1931年9月18日日本全面侵华 😠💢💢
-
-
