@@ -16,16 +16,19 @@ Jekyll是一个静态网站生成器，基于Ruby语言实现。它能够将一�
 1. 安装Jekyll依赖  
 下载和安装[Ruby](https://rubyinstaller.org/downloads/)，注意安装时将Ruby添加到系统环境变量。
 
-2. 安装jekyll和bundler gems
-```
-$ gem install jekyll bundler
+1. 安装jekyll和bundler gems
+
+```shell
+gem install jekyll bundler
 ```
 
-3. 创建新站点
+1. 创建新站点
+
+```shell
+jekyll new myblog, 将会在运行目录中生成myblog目录，作为站点根目录  
+jekyll new --skip-bundle ., 将以运行目录作为站点根目录
 ```
-$ jekyll new myblog, 将会在运行目录中生成myblog目录，作为站点根目录  
-$ jekyll new --skip-bundle ., 将以运行目录作为站点根目录
-```
+
 新站点目录的内容为：  
 **_posts:** 目录，存放写作内容文档，文档格式为日期-名称-后缀，如：2018-08-20-xxxxx.md  
 **.gitignore:** 文件，  
@@ -41,16 +44,19 @@ $ jekyll new --skip-bundle ., 将以运行目录作为站点根目录
 **_data:** 目录，数据文件(支持YAML、JSON、CSV)  
 **assets:** 目录，存放静态文件(包括CSS、JS、images等)  
 
-4. 安装站点依赖的库文件，即Gemfile的配置
-```
-$ bundle add webrick  #Ruby版本3.0.0或以上需要运行此处
-$ bundle install
+1. 安装站点依赖的库文件，即Gemfile的配置
+
+```shell
+bundle add webrick  #Ruby版本3.0.0或以上需要运行此处
+bundle install
 ```
 
-5. 本地站点测试
+1. 本地站点测试
+
+```shell
+bundle exec jekyll serve
 ```
-$ bundle exec jekyll serve
-```
+
 将会在站点根目录下生成 **_site** 目录，通过http://localhost:4000可访问站点
 
 ### 主题应用
@@ -83,7 +89,8 @@ src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 </iframe>
 
 代码为：
-```
+
+```html
 <iframe frameborder="0" border="0" marginwidth="0" marginheight="0" width=240 height=80
 src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 </iframe>
@@ -96,7 +103,8 @@ src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 </audio>
 
 代码为：
-```
+
+```html
 <audio controls loop>
   <source src="https://zer0o0.github.io/intergap.github.io/assets/audio/silence_voice.mp3" type="audio/mpeg">
   Your browser does not support this audio format.
@@ -104,6 +112,7 @@ src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 ```
 
 ### 参考
+
 [GitHub Pages指南](https://docs.github.com/cn/pages/quickstart)  
 [Jekyll官网](https://jekyllrb.com/)  
 [beautiful-jekyll theme文档](https://github.com/daattali/beautiful-jekyll)

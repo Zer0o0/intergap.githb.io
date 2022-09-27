@@ -35,10 +35,15 @@ RNA-seq的常规分析流程主要包括：
 
 [Snakemake](https://snakemake.readthedocs.io/en/stable/)是基于Python语言实现的一个工作流管理系统，用于创建可重复和可扩展的数据分析流程的工具。Snakemake 可以根据分析所需软件描述，自动部署到任何执行环境。此外，可以无缝扩展到服务器、集群、网格和云环境，无需修改工作流定义。
 
+**Ref**：  
+[A survey of best practices for RNA-seq data analysis. 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8)  
+[Exaggerated false positives by popular differential expression methods when analyzing human population samples. 2022](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02648-4)
+
 ### reads数据处理
 
 如下为基于Snakemake定义的RNA-seq分析流程，使用了Hisat2+featureCounts+DESeq2的组合工具，对双端测序（pair-end）数据使用，命令行运行 *snakemake -s snakefile --cores 12 --keep-going*：
-```
+
+```python
 ###################
 # Genome files #
 genome_index="/home/user/genomes/hisat2Index/hg38/genome"  #参考基因组
@@ -161,10 +166,11 @@ rule stringtie:
         tab="counts/{sample}.tab"
     params:
         ann=genome_gtf
+    threads: 12
     log:
         "counts/logs/{sample}.log"
     shell:
-        "stringtie -o {output.gtf} -A {output.tab} -e -G {params.ann} --rf {input} 2> {log}"
+        "stringtie -o {output.gtf} -A {output.tab} -e -G {params.ann} --rf -p {threads} {input} 2> {log}"
 
 rule featurecounts:
     input:
@@ -179,11 +185,15 @@ rule featurecounts:
         "featureCounts -s 2 -p -B -t exon -g gene_id -a {params.gtf} -o {output} {input} 2> {log}"   
 ```
 
+关于**StringTie表达值的转换**
+
+StringTie计算得到的基因表达量已经标准化为FPKM和TPM，在使用DESeq2做差异分析时需要提供Count值，因此官方提供了python脚本[prepDE.py3](https://github.com/gpertea/stringtie/blob/master/prepDE.py3)来完成转换，（计算方法为coverage\*transcript_len/read_len，而非FPKM转换，注意计算差异时删除生成文件的最后一行），使用方法为 *python prepDE.py3 -i PATH_TO_STRINGTIE_OUTDIR -g gene_count_matrix.csv -t transcript_count_matrix.csv -l READS_LENGTH*。
+
 ### 差异表达分析
 
-- 使用Cufflinks-cuffdiff进行差异分析，
+- 使用Cufflinks-cuffdiff进行差异分析，从bam文件开始，不需要定量表达水平。
 
-```
+```shell
 cuffdiff [options]* transcripts.gtf \
 sample1_replicate1.sam[,…,sample1_replicateM.sam] \
 sample2_replicate1.sam[,…,sample2_replicateM.sam] … \
@@ -193,7 +203,7 @@ sampleN.sam_replicate1.sam[,…,sample2_replicateM.sam]
 --library-type fr-firststrand --min-reps-for-js-test M --labels sample1,sample2,...,sampleN -p 12
 ```
 
-*需要注意，差异倍数计算方向是输入文件的后者-前者，如sample2-sample1，可以对照实际表达值校对*
+需要注意，*差异倍数计算方向是输入文件的后者-前者，如sample2-sample1，可以对照实际表达值校对*
 
 - 使用R包DESeq2进行差异分析，
 
@@ -211,16 +221,16 @@ for (i in files){
   n <- str_sub(i,end=-11)
   n2 <- paste0(n,'_fpkm')
   d <- select(d,c(1,6,7))
-  colnames(d) <- c('geneid','length',n)
+  colnames(d) <- c('gene_id','length',n)
   N <- sum(d[,n])
   d[,n2] <- round(10^9*d[,n]/(d[,'length']*N),2)
   # d <- mutate(d,fpkm=round(10^9*d[,n]/(d[,'length']*N),2))#计算fpkm
-  # colnames(d) <- c('geneid','length',n,n2)
+  # colnames(d) <- c('gene_id','length',n,n2)
   #colnames 无法改名？？，
   if (length(counts_d)==0){
     counts_d <- d
   }else{
-    counts_d <- merge(counts_d,d,by=c('geneid','length'))
+    counts_d <- merge(counts_d,d,by=c('gene_id','length'))
   }
 }
 head(counts_d)
@@ -232,7 +242,6 @@ x <- rowSums(corr_d)
 corr_d <- corr_d[x>0,]
 
 # library(ggcorrplot)
-
 # corr <- round(cor(log2(corr_d+1)),2)
 # ggcorrplot(
 #   corr,
@@ -252,15 +261,18 @@ ggsave('pairsplot.jpg',width = 14,height = 14,dpi = 300,units = 'cm')
 
 ## 基因差异表达分析
 library(DESeq2)
-cts <- counts_d%>%select(1,3,5,7,9) # 基因表达矩阵，基因名作为行名，样本名作为列名，至少有2个重复
-rownames(cts) <- cts$geneid
-cts$geneid <- NULL
-design <- data.frame(
+cts <- counts_d%>%
+  select(1,3,5,7,9)%>%
+  column_to_rownames('gene_id') # 基因表达矩阵，基因名作为行名，样本名作为列名，至少有2个重复
+
+sampleinfo <- data.frame(
   sample = colnames(cts),
   condition = c("ctrl", "treat", "ctrl", "treat"),
   batch = c("I", "I", "II", "II")
 ) #设置批次，去除批次效应
-coldata <- data.frame(row.names = design$sample, condition = factor(design$condition), batch = factor(design$batch))
+coldata <- data.frame(row.names = sampleinfo$sample, 
+                      condition = factor(sampleinfo$condition, levels = c("treat", "ctrl")), 
+                      batch = factor(sampleinfo$batch))
 dds <- DESeqDataSetFromMatrix(cts, colData = coldata, design = ~ batch + condition) # 去除批次效应~batch+condition
 dds$condition <- factor(dds$condition, levels = c("treat", "ctrl")) # 设置比较方向，如treat-ctrl
 dds <- DESeq(dds)
@@ -285,19 +297,19 @@ plotPCA(vsd, "condition")  #观察去除批次效应后的效果
 res <- results(dds, contrast = c("condition", "treat", "ctrl"))
 res <- res[order(res$pvalue), ]
 res <- na.omit(as.data.frame(res))
-res$geneid <- rownames(res)
+res$gene_id <- rownames(res)
 
 # 定义显著性阈值，筛选差异表达分析
 p <- log10(0.05) * (-1)
 fc <- log2(2)
 degs <- res %>%
-  select(geneid, log2FoldChange, pvalue, padj) %>%
+  select(gene_id,baseMean,log2FoldChange,lfcSE,stat,pvalue,padj) %>%
   mutate(logp = log10(pvalue) * (-1)) %>%
   mutate(type = if_else(logp > p, if_else(log2FoldChange > fc, "Up", if_else(log2FoldChange < (-fc), "Down", "N.s")), "N.s")) %>%
   arrange(type)
 
 table(degs$type)
-write.table(degs, "degs_of_rnaseq.txt", row.names = F, sep='\t')
+write.table(degs, "degs_DESeq2.txt", row.names = F, sep='\t')
 
 # 火山图可视化
 degs %>%
@@ -331,27 +343,23 @@ ggsave("vocalno.jpg", width = 10, height = 8, dpi = 1200, units = "cm")
 library(tidyverse)  #数据输入和变换
 library(stringr)
 library(openxlsx)  #打开Excel
-
 library(ggthemes)  #图形主题
 library(hrbrthemes)
 library(ggpubr)
-
 library(RColorBrewer)  #图形色彩
 library(ggsci)
 library(scico)
 library(viridis)
 library(viridisLite)
 library(scales)
-
 library(ggbreak)  #打断坐标轴
 library(ggpointdensity)  #点密度图
-
 library(pheatmap)  #热图
 
 mypal <- pal_npg("nrc",alpha = 0.6)(4)  #颜色选择
 show_col(mypal)
 
-go <- read_tsv('RESULT_OF_DAVID')
+go <- read_tsv(RESULT_OF_DAVID)
 
 p <- go %>%
   slice(1:10) %>% #选取前10个term
@@ -400,6 +408,314 @@ data %>%
   labs(x = "", y = "Percent of Cell Number (%)", title = "") +
   theme(axis.title = element_text(size = 10))
 ggsave("cell_cycle.jpg", width = 6, height = 6, units = "cm", dpi = 1200)
+```
+
+**prepDE.py3代码如下：**
+
+```python
+#!/usr/bin/env python3
+import re, csv, sys, os, glob, warnings, itertools
+from math import ceil
+from optparse import OptionParser
+from operator import itemgetter
+from collections import defaultdict
+
+parser=OptionParser(description='Generates two CSV files containing the count matrices for genes and transcripts, using the coverage values found in the output of `stringtie -e`')
+parser.add_option('-i', '--input', '--in', default='.', help="a folder containing all sample sub-directories, or a text file with sample ID and path to its GTF file on each line [default: %default/]")
+parser.add_option('-g', default='gene_count_matrix.csv', help="where to output the gene count matrix [default: %default")
+parser.add_option('-t', default='transcript_count_matrix.csv', help="where to output the transcript count matrix [default: %default]")
+parser.add_option('-l', '--length', default=75, type='int', help="the average read length [default: %default]")
+parser.add_option('-p', '--pattern', default=".", help="a regular expression that selects the sample subdirectories")
+parser.add_option('-c', '--cluster', action="store_true", help="whether to cluster genes that overlap with different gene IDs, ignoring ones with geneID pattern (see below)")
+parser.add_option('-s', '--string', default="MSTRG", help="if a different prefix is used for geneIDs assigned by StringTie [default: %default]")
+parser.add_option('-k', '--key', default="prepG", help="if clustering, what prefix to use for geneIDs assigned by this script [default: %default]")
+parser.add_option('-v', action="store_true", help="enable verbose processing")
+
+parser.add_option('--legend', default="legend.csv", help="if clustering, where to output the legend file mapping transcripts to assigned geneIDs [default: %default]")
+(opts, args)=parser.parse_args()
+
+samples = [] # List of tuples. If sample list, (first column, path). Else, (subdirectory name, path to gtf file in subdirectory)
+if (os.path.isfile(opts.input)):
+    # gtfList = True
+    try:
+        fin = open(opts.input, 'r')
+        for line in fin:
+            if line[0] != '#':
+                lineLst = tuple(line.strip().split(None,2))
+                if (len(lineLst) != 2):
+                    print("Error: line should have a sample ID and a file path:\n%s" % (line.strip()))
+                    exit(1)
+                if lineLst[0] in samples:
+                    print("Error: non-unique sample ID (%s)" % (lineLst[0]))
+                    exit(1)
+                if not os.path.isfile(lineLst[1]):
+                    print("Error: GTF file not found (%s)" % (lineLst[1]))
+                    exit(1)
+                samples.append(lineLst)
+    except IOError:
+        print("Error: List of .gtf files, %s, doesn't exist" % (opts.input))
+        exit(1)
+else:
+    # gtfList = False
+    ## Check that opts.input directory exists
+    if not os.path.isdir(opts.input):
+      parser.print_help()
+      print(" ")
+      print("Error: sub-directory '%s' not found!" % (opts.input))
+      sys.exit(1)
+    #####
+    ## Collect all samples file paths and if empty print help message and quit
+    #####
+    samples = []
+    for i in next(os.walk(opts.input))[1]:
+        if re.search(opts.pattern,i):
+         for f in glob.iglob(os.path.join(opts.input,i,"*.gtf")):
+            samples.append((i,f)) 
+
+if len(samples) == 0:
+  parser.print_help()
+  print(" ")
+  print("Error: no GTF files found under base directory %s !" % (opts.input))
+  sys.exit(1)
+
+RE_GENE_ID=re.compile('gene_id "([^"]+)"')
+RE_GENE_NAME=re.compile('gene_name "([^"]+)"')
+RE_TRANSCRIPT_ID=re.compile('transcript_id "([^"]+)"')
+RE_COVERAGE=re.compile('cov "([\-\+\d\.]+)"')
+RE_STRING=re.compile(re.escape(opts.string))
+
+RE_GFILE=re.compile('\-G\s*(\S+)') #assume filepath without spaces..
+
+
+#####
+## Sort the sample names by the sample ID
+#####
+
+samples.sort()
+
+#if opts.v:
+#  print "Sample GTFs found:"
+#  for s in samples:
+#     print s[1]
+
+#####
+## Checks whether a given row is a transcript 
+## other options: ex. exon, transcript, mRNA, 5'UTR
+#####
+def is_transcript(x):
+  return len(x)>2 and x[2]=="transcript"
+
+def getGeneID(s, ctg, tid):
+  r=RE_GENE_ID.search(s)
+  #if r: return r.group(1)
+  rn=RE_GENE_NAME.search(s)
+  #if rn: return ctg+'|'+rn.group(1)
+  if r:
+    if rn: 
+      return r.group(1)+'|'+rn.group(1)
+    else:
+      return r.group(1)
+  return tid
+
+def getCov(s):
+  r=RE_COVERAGE.search(s)
+  if r:
+    v=float(r.group(1))
+    if v<0.0: v=0.0
+    return v
+  return 0.0
+
+def is_overlap(x,y): #NEEDS TO BE INTS!
+  return x[0]<=y[1] and y[0]<=x[1]
+
+
+def t_overlap(t1, t2): #from badGenes: chromosome, strand, cluster, start, end, (e1start, e1end)...
+    if t1[0] != t2[0] or t1[1] != t2[1] or t1[5]<t2[4]: return False
+    for i in range(6, len(t1)):
+        for j in range(6, len(t2)):
+            if is_overlap(t1[i], t2[j]): return True
+    return False
+
+## Average Readlength
+read_len=opts.length
+
+## Variables/Matrices to store t/g_counts
+t_count_matrix, g_count_matrix=[],[]
+
+##Get ready for clustering, stuff is once for all samples##
+geneIDs=defaultdict(lambda: str) #key=transcript, value=cluster/gene_id
+
+
+## For each of the sorted sample paths
+for s in samples:
+    badGenes=[] #list of bad genes (just ones that aren't MSTRG)
+    try:
+        ## opts.input = parent directory of sample subdirectories
+        ## s = sample currently iterating through
+        ## os.path.join(opts.input,s,"*.gtf") path to current sample's GTF
+        ## split = list of lists: [[chromosome, ...],...]
+
+        #with open(glob.iglob(os.path.join(opts.input,s,"*.gtf")).next()) as f:
+        #    split=[l.split('\t') for l in f.readlines()]
+#        if not gtfList:
+#            f = open(glob.iglob(os.path.join(opts.input,s[1],"*.gtf")).next())
+#        else:
+#            f = open(s[1])
+        with open(s[1]) as f:
+            split=[l.split('\t') for l in f.readlines()]
+
+        ## i = numLine; v = corresponding i-th GTF row
+        for i,v in enumerate(split):
+            if is_transcript(v):
+                try:
+                  t_id=RE_TRANSCRIPT_ID.search(v[8]).group(1)
+                  g_id=getGeneID(v[8], v[0], t_id)
+                except:
+                  print("Problem parsing file %s at line:\n:%s\n" % (s[1], v))
+                  sys.exit(1)
+                geneIDs[t_id]=g_id
+                if not RE_STRING.match(g_id):
+                    badGenes.append([v[0],v[6], t_id, g_id, min(int(v[3]),int(v[4])), max(int(v[3]),int(v[4]))]) #chromosome, strand, cluster/transcript id, start, end
+                    j=i+1
+                    while j<len(split) and split[j][2]=="exon":
+                        badGenes[len(badGenes)-1].append((min(int(split[j][3]), int(split[j][4])), max(int(split[j][3]), int(split[j][4]))))
+                        j+=1
+
+    except StopIteration:
+        warnings.warn("Didn't get a GTF in that directory. Looking in another...")
+
+    else: #we found the "bad" genes!
+        break
+
+##THE CLUSTERING BEGINS!##
+if opts.cluster and len(badGenes)>0:
+    clusters=[] #lists of lists (could be sets) or something of transcripts
+    badGenes.sort(key=itemgetter(3)) #sort by start coord...?
+    i=0
+    while i<len(badGenes): #rather un-pythonic
+        temp_cluster=[badGenes[i]]
+
+        k=0
+        while k<len(temp_cluster):
+            j=i+1
+            while j<len(badGenes):
+                if t_overlap(temp_cluster[k], badGenes[j]):
+                    temp_cluster.append(badGenes[j])
+                    del badGenes[j]
+                else:
+                    j+=1
+            k+=1
+        if len(temp_cluster)>1:
+            clusters.append([t[2] for t in temp_cluster])
+        i+=1
+
+    print(len(clusters))
+
+    for c in clusters:
+        c.sort()
+
+    clusters.sort(key=itemgetter(0))
+    legend=[]
+    for u,c in enumerate(clusters):
+        my_ID=opts.key+str((u+1))
+        legend.append(list(itertools.chain.from_iterable([[my_ID],c]))) #my_ID, clustered transcript IDs
+        for t in c:
+            geneIDs[t]=my_ID
+##            geneIDs[t]="|".join(c) #duct-tape transcript IDs together, disregarding ref_gene_names and things like that
+
+    with open(opts.legend, 'w') as l_file:
+        my_writer=csv.writer(l_file)
+        my_writer.writerows(legend)
+
+geneDict=defaultdict(lambda: defaultdict(lambda: 0)) #key=gene/cluster, value=dictionary with key=sample, value=summed counts
+t_dict=defaultdict(lambda: defaultdict(lambda: 0))
+guidesFile='' # file given with -G for the 1st sample
+for q, s in enumerate(samples):
+    if opts.v:
+       print(">processing sample %s from file %s" % s)
+    lno=0
+    try:
+        #with open(glob.iglob(os.path.join(opts.input,s,"*.gtf")).next()) as f: #grabs first .gtf file it finds inside the sample subdirectory
+#        if not gtfList:
+#            f = open(glob.iglob(os.path.join(opts.input,s[1],"*.gtf")).next())
+#        else:
+        f = open(s[1])
+        transcript_len=0
+        
+        for l in f:
+            lno+=1
+            if l.startswith('#'):
+                if lno==1:
+                    ei=l.find('-e')
+                    if ei<0:
+                       print("Error: sample file %s was not generated with -e option!" % ( s[1] ))
+                       sys.exit(1)
+                    gf=RE_GFILE.search(l)
+                    if gf:
+                       gfile=gf.group(1)
+                       if guidesFile:
+                          if gfile != guidesFile:
+                             print("Warning: sample file %s generated with a different -G file (%s) than the first sample (%s)" % ( s[1], gfile, guidesFile ))
+                       else:
+                          guidesFile=gfile
+                    else:
+                       print("Error: sample %s was not processed with -G option!" % ( s[1] ))
+                       sys.exit(1)
+                continue
+            v=l.split('\t')
+            if v[2]=="transcript":
+                if transcript_len>0:
+##                        transcriptList.append((g_id, t_id, int(ceil(coverage*transcript_len/read_len))))
+                    t_dict[t_id][s[0]] = int(ceil(coverage*transcript_len/read_len))
+                t_id=RE_TRANSCRIPT_ID.search(v[len(v)-1]).group(1)
+                #g_id=RE_GENE_ID.search(v[len(v)-1]).group(1)
+                g_id=getGeneID(v[8], v[0], t_id)
+                #coverage=float(RE_COVERAGE.search(v[len(v)-1]).group(1))
+                coverage=getCov(v[8])
+                transcript_len=0
+            if v[2]=="exon":
+                transcript_len+=int(v[4])-int(v[3])+1 #because end coordinates are inclusive in GTF
+
+##            transcriptList.append((g_id, t_id, int(ceil(coverage*transcript_len/read_len))))
+        t_dict[t_id][s[0]]=int(ceil(coverage*transcript_len/read_len))
+
+    except StopIteration:
+#        if not gtfList:
+#            warnings.warn("No GTF file found in " + os.path.join(opts.input,s[1]))
+#        else:
+        warnings.warn("No GTF file found in " + s[1])
+
+
+##        transcriptList.sort(key=lambda bla: bla[1]) #gene_id
+    
+    for i,v in t_dict.items():
+##        print i,v
+       try:
+          geneDict[geneIDs[i]][s[0]]+=v[s[0]]
+       except KeyError:
+          print("Error: could not locate transcript %s entry for sample %s" % ( i, s[0] ))
+          raise
+
+if opts.v:
+   print("..writing %s " % ( opts.t ))
+with open(opts.t, 'w') as csvfile:
+   my_writer = csv.DictWriter(csvfile, fieldnames = ["transcript_id"] + [x for x,y in samples])
+   my_writer.writerow(dict((fn,fn) for fn in my_writer.fieldnames))
+   for i in t_dict:
+        t_dict[i]["transcript_id"] = i
+        my_writer.writerow(t_dict[i])
+if opts.v:
+   print("..writing %s " % ( opts.g ))
+with open(opts.g, 'w') as csvfile:
+   my_writer = csv.DictWriter(csvfile, fieldnames = ["gene_id"] + [x for x,y in samples])
+##    my_writer.writerow([""]+samples)
+##    my_writer.writerows(geneDict)
+   my_writer.writerow(dict((fn,fn) for fn in my_writer.fieldnames))
+   for i in geneDict:
+        geneDict[i]["gene_id"] = i #add gene_id to row
+        my_writer.writerow(geneDict[i])
+if opts.v:
+   print("All done.")
 ```
 
 ---

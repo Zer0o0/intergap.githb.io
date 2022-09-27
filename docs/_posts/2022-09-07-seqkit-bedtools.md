@@ -13,37 +13,41 @@ fasta和fastq是两种存储核酸序列（DNA、RNA）或者蛋白质序列（A
 
 - 基因（protein_coding）
 
-```
+```shell
 zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") print $0}' | grep "protein_coding" | grep -v "ncRNA_host" > mm10_ENCFF871VGR_gene.gtf
 ```
 
 - 转录本
 
-```
+```shell
 zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="transcript") print $0}' | grep "protein_coding" > mm10_ENCFF871VGR_transcript.gtf
 ```
 
 - 启动子区，注意正负链的延伸方向不一致
 
-```
+```shell
 zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") {if($7=="+") {start=$4-500; end=$4+100;} else {if($7=="-") start=$5-100; end=$5+500;} if(start<0) start=0; print $1,$2,$3,start,end,$6,$7,$8,$9;}}' | grep "protein_coding" | grep -v "ncRNA_host" > mm10_ENCFF871VGR_promoter.gtf
 ```
+
 ### 使用seqkit
 
 - 提取序列
 
 1. 基因区域（TSS-500bp to TES+500bp）
-```
+
+```shell
 seqkit subseq --gtf mm10_ENCFF871VGR_gene.gtf  -u 500 -d 500 mm10_no_alt_analysis_set_ENCODE.fasta | seqkit sort -l --quiet > mm10_ENCFF871VGR_gene_u500_d500.fa
 ```
-2. 启动子区域（TSS-500bp to TSS+100bp）
-```
+
+1. 启动子区域（TSS-500bp to TSS+100bp）
+
+```shell
 seqkit subseq --gtf mm10_ENCFF871VGR_promoter.gtf mm10_no_alt_analysis_set_ENCODE.fasta |seqkit seq -u > mm10_ENCFF871VGR_promoter.seqkit.fa
 ```
 
 - 序列信息统计
 
-```
+```shell
 seqkit stats mm10_ENCFF871VGR_gene_u500_d500.fa > mm10_ENCFF871VGR_gene_u500_d500.fa.stats.txt #序列统计信息
 seqkit watch --fields ReadLen mm10_ENCFF871VGR_gene_u500_d500.fa -O mm10_ENCFF871VGR_gene_u500_d500.fa.lendis.png #直方图展示统计信息
 seqkit fx2tab mm10_ENCFF871VGR_gene_promoter.fa -l -g -n -i -H > mm10_ENCFF871VGR_promoter.seqkit.fa.tab.txt #每条序列信息
@@ -53,13 +57,13 @@ seqkit fx2tab mm10_ENCFF871VGR_gene_promoter.fa -l -g -n -i -H > mm10_ENCFF871VG
 
 - 提取序列
 
-```
+```shell
 bedtools getfasta -s -fi mm10_no_alt_analysis_set_ENCODE.fasta -bed mm10_ENCFF871VGR_promoter.gtf > mm10_ENCFF871VGR_promoter.bedtools.fa
 ```
 
 - 随机背景序列
 
-```
+```shell
 bedtools shuffle -seed 1234 -i mm10_ENCFF871VGR_promoter.gtf -g mm10_no_alt_analysis_set_ENCODE.fasta.fai > mm10_ENCFF871VGR_promoter_shuffle.gtf  #根据参考基因组坐标信息（fai|genome文件），在基因组上随机选取位置片段，片段长度与bed文件的长度一致
 bedtools getfasta -s -fi mm10_no_alt_analysis_set_ENCODE.fasta -bed mm10_ENCFF871VGR_promoter_shuffle.gtf > mm10_ENCFF871VGR_promoter_shuffle.fa #提取序列
 ```
