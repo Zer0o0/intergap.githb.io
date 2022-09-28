@@ -42,7 +42,7 @@ ChIP-seq的一般分析过程包括：
 8. 差异分析：
 [DiffBind](https://bioconductor.org/packages/release/bioc/html/DiffBind.html)
 9. 可视化：
-[deepTools](https://deeptools.readthedocs.io/en/develop/)、[IGV](https://igv.org/)、[bedtools](https://bedtools.readthedocs.io/en/latest/content/bedtools-suite.html)、[WWebLogo](https://weblogo.threeplusone.com/)等
+[deepTools](https://deeptools.readthedocs.io/en/develop/)、[IGV](https://igv.org/)、[bedtools](https://bedtools.readthedocs.io/en/latest/content/bedtools-suite.html)、[WebLogo](https://weblogo.threeplusone.com/)等
 
 ### reads数据处理
 
@@ -203,7 +203,7 @@ rule deduplicates:
     output:
         bam="alignment/filter/{sample}.filter.dedup.bam",
         matrix="alignment/filter/{sample}.filter.dedup.txt"
-    threads: 16
+    threads: 12
     log:
         "alignment/filter/logs/{sample}.dedup.log"
     shell:
