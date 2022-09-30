@@ -111,6 +111,16 @@ src="//i.y.qq.com/n2/m/outchain/player/index.html?songid=101167817">
 </audio>
 ```
 
+### 其他
+
+1、花括号在 Jekyll 被识别成 Liquid 代码的问题，使用Liquid 的 raw 来注释，代码如下：
+
+```
+{% raw %}
+{% comment %} 这里是各种包含奇怪花括号 {{{0}}} 的地方 {% endcomment %}
+{% endraw %}
+```
+
 ### 参考
 
 [GitHub Pages指南](https://docs.github.com/cn/pages/quickstart)  
