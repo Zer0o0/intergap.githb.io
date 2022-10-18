@@ -107,23 +107,23 @@ Google学术搜索关键词 deep learning; genomics; review
 >4.3 Protein Tertiary Structure and Quality Assessment  
 >4.4 Contact Map
 >
->|应用领域|研究对象|模型|相关文章|
->|--|--|--|--|
->|[Gene expression](https://en.wikipedia.org/wiki/Gene_expression) |Characterization||[D.Urda et al. 2017](https://link.springer.com/chapter/10.1007/978-3-319-59147-6_5), [Jie Tan et al. 2017](https://www.sciencedirect.com/science/article/pii/S2405471217302314?via%3Dihub), [Padideh Danaee et al. 2017](https://www.worldscientific.com/doi/abs/10.1142/9789813207813_0022), [Aman Gupta et al. 2015](https://ieeexplore.ieee.org/document/7359871), [Lujia Chen et al. 2016](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0852-1), [Gregory P. Way et al. 2017](https://arxiv.org/abs/1711.04828), [Ayse Dincer at al. 2018](https://www.biorxiv.org/content/10.1101/278739v1), [Hossein Sharifi-Noghabi et al. 2018](https://www.biorxiv.org/content/10.1101/276055v2), [Haohan Wang et al. 2017](https://www.inderscienceonline.com/doi/10.1504/IJDMB.2017.085711), |
->||Prediction||[Yifei Chen et al. 2016](https://academic.oup.com/bioinformatics/article/32/12/1832/1743989), [Rui Xie et al. 2017](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-017-4226-0), [Ritambhara Singh et al.](https://academic.oup.com/bioinformatics/article/32/17/i639/2450757), |
->|Regulatory Genomics|[Promoter](https://en.wikipedia.org/wiki/Promoter_(genetics))||[Ramzan Kh.Umarov et al. 2017](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0171410), [Shashank Singh et al. 2019](https://link.springer.com/article/10.1007/s40484-019-0154-0), [Sean Whalen et al. 2016](https://www.nature.com/articles/ng.3539), |
->||[Enhancer](https://en.wikipedia.org/wiki/Enhancer_(genetics))||[Dikla Cohn et al. 2018](https://www.biorxiv.org/content/10.1101/264200v2), [Feng Liu et al. 2016](https://www.nature.com/articles/srep28517#Sec2), [Xu Min et al. 2017](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1878-3), [Bite Yang et al. 2017](https://academic.oup.com/bioinformatics/article/33/13/1930/3002766), |
->||[non-coding DNA](https://en.wikipedia.org/wiki/Non-coding_DNA)|||
->||[microRNA, miRNA](https://en.wikipedia.org/wiki/MicroRNA)|||
->||[Transcription factor, TF](https://en.wikipedia.org/wiki/Transcription_factor)||[Babak Alipanahi et al. 2015](https://www.nature.com/articles/nbt.3300), [Dexiong Chen et al. 2017](https://www.biorxiv.org/content/10.1101/217257v1), [Haoyang Zeng et al. 2016](https://academic.oup.com/bioinformatics/article/32/12/i121/2240609), [Jack Lanchantin et al. 2016](https://arxiv.org/abs/1608.03644), [Avanti Shrikumar et al. 2017](https://www.biorxiv.org/content/10.1101/103663v1), |
->||[Alternative splicing, AS](https://en.wikipedia.org/wiki/Alternative_splicing)||[Anupama Jha et al.](https://academic.oup.com/bioinformatics/article/33/14/i274/3953982)|
->||[RNA-binding protein, RBP](https://en.wikipedia.org/wiki/RNA-binding_protein)|||
->||[DNA methylation](https://en.wikipedia.org/wiki/DNA_methylation)|||
->||DNA accessbility|||
->|[Functional Genomics](https://en.wikipedia.org/wiki/Functional_genomics)|[Mutations](https://en.wikipedia.org/wiki/Mutation)||[David R. Kelley et al. 2016](https://genome.cshlp.org/content/26/7/990.long), [Jian Zhou et al. 2015](https://www.nature.com/articles/nmeth.3547), [Adam J. Riesselman et al. 2018](https://www.nature.com/articles/s41592-018-0138-4), [Gabriel E Hoffman et al. 2019](https://academic.oup.com/nar/article/47/20/10597/5572574?login=true)|
->||Subcellular Localization|||
->|[Structural Genomics](https://en.wikipedia.org/wiki/Structural_genomics)|[Protein structure](https://en.wikipedia.org/wiki/Protein_structure)||[John Jumper et al. 2021](https://www.nature.com/articles/s41586-021-03819-2)|
->||Contact map|||
+>|应用领域|研究对象|相关文章|
+>|--|--|--|
+>|[Gene expression](https://en.wikipedia.org/wiki/Gene_expression) |Characterization|[D.Urda et al. 2017](https://link.springer.com/chapter/10.1007/978-3-319-59147-6_5), [Jie Tan et al. 2017](https://www.sciencedirect.com/science/article/pii/S2405471217302314?via%3Dihub), [Padideh Danaee et al. 2017](https://www.worldscientific.com/doi/abs/10.1142/9789813207813_0022), [Aman Gupta et al. 2015](https://ieeexplore.ieee.org/document/7359871), [Lujia Chen et al. 2016](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0852-1), [Gregory P. Way et al. 2017](https://arxiv.org/abs/1711.04828), [Ayse Dincer at al. 2018](https://www.biorxiv.org/content/10.1101/278739v1), [Hossein Sharifi-Noghabi et al. 2018](https://www.biorxiv.org/content/10.1101/276055v2), [Haohan Wang et al. 2017](https://www.inderscienceonline.com/doi/10.1504/IJDMB.2017.085711), |
+>||Prediction|[Yifei Chen et al. 2016](https://academic.oup.com/bioinformatics/article/32/12/1832/1743989), [Rui Xie et al. 2017](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-017-4226-0), [Ritambhara Singh et al.](https://academic.oup.com/bioinformatics/article/32/17/i639/2450757), |
+>|Regulatory Genomics|[Promoter](https://en.wikipedia.org/wiki/Promoter_(genetics))|[Ramzan Kh.Umarov et al. 2017](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0171410), [Shashank Singh et al. 2019](https://link.springer.com/article/10.1007/s40484-019-0154-0), [Sean Whalen et al. 2016](https://www.nature.com/articles/ng.3539), |
+>||[Enhancer](https://en.wikipedia.org/wiki/Enhancer_(genetics))|[Dikla Cohn et al. 2018](https://www.biorxiv.org/content/10.1101/264200v2), [Feng Liu et al. 2016](https://www.nature.com/articles/srep28517#Sec2), [Xu Min et al. 2017](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1878-3), [Bite Yang et al. 2017](https://academic.oup.com/bioinformatics/article/33/13/1930/3002766), |
+>||[non-coding DNA](https://en.wikipedia.org/wiki/Non-coding_DNA)||
+>||[microRNA, miRNA](https://en.wikipedia.org/wiki/MicroRNA)||
+>||[Transcription factor, TF](https://en.wikipedia.org/wiki/Transcription_factor)|[Babak Alipanahi et al. 2015](https://www.nature.com/articles/nbt.3300), [Dexiong Chen et al. 2017](https://www.biorxiv.org/content/10.1101/217257v1), [Haoyang Zeng et al. 2016](https://academic.oup.com/bioinformatics/article/32/12/i121/2240609), [Jack Lanchantin et al. 2016](https://arxiv.org/abs/1608.03644), [Avanti Shrikumar et al. 2017](https://www.biorxiv.org/content/10.1101/103663v1), |
+>||[Alternative splicing, AS](https://en.wikipedia.org/wiki/Alternative_splicing)|[Anupama Jha et al.](https://academic.oup.com/bioinformatics/article/33/14/i274/3953982)|
+>||[RNA-binding protein, RBP](https://en.wikipedia.org/wiki/RNA-binding_protein)||
+>||[DNA methylation](https://en.wikipedia.org/wiki/DNA_methylation)||
+>||DNA accessbility||
+>|[Functional Genomics](https://en.wikipedia.org/wiki/Functional_genomics)|[Mutations](https://en.wikipedia.org/wiki/Mutation)|[David R. Kelley et al. 2016](https://genome.cshlp.org/content/26/7/990.long), [Jian Zhou et al. 2015](https://www.nature.com/articles/nmeth.3547), [Adam J. Riesselman et al. 2018](https://www.nature.com/articles/s41592-018-0138-4), [Gabriel E Hoffman et al. 2019](https://academic.oup.com/nar/article/47/20/10597/5572574?login=true)|
+>||Subcellular Localization||
+>|[Structural Genomics](https://en.wikipedia.org/wiki/Structural_genomics)|[Protein structure](https://en.wikipedia.org/wiki/Protein_structure)|[John Jumper et al. 2021](https://www.nature.com/articles/s41586-021-03819-2)|
+>||Contact map||
 >
 
 - [Deep learning models in genomics; are we there yet? 2020](https://www.sciencedirect.com/science/article/pii/S2001037020303068)
