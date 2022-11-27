@@ -23,9 +23,9 @@ navbar-links:
   Home: "index"
   Resources:
     - Time: "https://time.is/zh/"
-    - Movies: "https://cupfox.app/"
     - Wallpapers: "https://wallhaven.cc/"
     - Xiangqi: "https://www.chessdb.cn/query/"
+    - Baimiao: "https://web.baimiaoapp.com/"
     - More...: "moresource"
   Publications: "publication"
   About Me: "aboutme"

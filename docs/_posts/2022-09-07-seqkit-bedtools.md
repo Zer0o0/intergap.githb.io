@@ -14,19 +14,19 @@ fasta和fastq是两种存储核酸序列（DNA、RNA）或者蛋白质序列（A
 - 基因（protein_coding）
 
 ```shell
-zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") print $0}' | grep "protein_coding" | grep -v "ncRNA_host" > mm10_ENCFF871VGR_gene.gtf
+awk '{if($3=="gene" && $12=="\"protein_coding\";"){print $0}}' gencode.gtf
 ```
 
-- 转录本
+- 转录本（protein_coding)
 
 ```shell
-zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="transcript") print $0}' | grep "protein_coding" > mm10_ENCFF871VGR_transcript.gtf
+awk '{if($3=="transcript" && $18=="\"protein_coding\";"){print $0}}' gencode.gtf
 ```
 
 - 启动子区，注意正负链的延伸方向不一致
 
 ```shell
-zcat mm10_ENCFF871VGR.gtf.gz | awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") {if($7=="+") {start=$4-500; end=$4+100;} else {if($7=="-") start=$5-100; end=$5+500;} if(start<0) start=0; print $1,$2,$3,start,end,$6,$7,$8,$9;}}' | grep "protein_coding" | grep -v "ncRNA_host" > mm10_ENCFF871VGR_promoter.gtf
+awk 'BEGIN{OFS=FS="\t"}{if($3=="gene") {if($7=="+") {start=$4-500; end=$4+100;} else {if($7=="-") start=$5-100; end=$5+500;} if(start<0) start=0; print $1,$2,$3,start,end,$6,$7,$8,$9;}}' | grep "protein_coding" > gencode.gtf
 ```
 
 ### 使用seqkit
@@ -79,11 +79,15 @@ bedtools的速度快于seqkit。
 
 - GTF (gene transfer format)文件
 
+[Gencode文档](https://www.gencodegenes.org/pages/data_format.html)
+
+[WIKI基因结构说明](https://en.wikipedia.org/wiki/Gene_structure)
+
 GTF格式文件用来对基因组进行注释，由以tab键分割的9列组成，分别是：
 
 1. seq_id: 序列的编号，一般为chr或者scanfold编号；
 2. source: 注释的来源，一般为数据库或者注释的机构，如果未知，则用点“.”代替；
-3. type: 注释信息的类型，比如Gene、cDNA、mRNA、CDS等；
+3. type: 注释信息的类型，比如gene, transcript, CDS, exon, start_codon, stop_codon, UTR等；
 4. start: 该基因或转录本在参考序列上的起始位置；
 5. end: 该基因或转录本在参考序列上的终止位置；
 6. score: 得分，数字，是注释信息可能性的说明，可以是序列相似性比对时的E-values值或者基因预测是的P-values值，“.”表示为空；

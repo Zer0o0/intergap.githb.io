@@ -4,6 +4,9 @@ title: Deep learning 在基因组学中的应用
 tags: [deep learning, genomics, papers]
 ---
 
+[Epigenetics wiki](https://en.wikipedia.org/wiki/Epigenetics)
+![](https://commonfund.nih.gov/sites/default/files/epigenomicsimg1.jpg)
+
 ### 综述
 
 Google学术搜索关键词 deep learning; genomics; review
@@ -251,6 +254,62 @@ Google学术搜索关键词 deep learning; genomics; review
 >
 
 [FactorNet: A deep learning framework for predicting cell type specific
-transcription factor binding from nucleotide-resolution sequential data. 2018. /DanielQuang, XiaohuiXie/](https://www.sciencedirect.com/science/article/pii/S1046202318303293)
+transcription factor binding from nucleotide-resolution sequential data. 2018. /DanielQuang, XiaohuiXie/](https://doi.org/10.1016/j.ymeth.2019.03.020)
 
 [DeepBind]
+
+[DeepD2V: A Novel Deep Learning-Based Framework for Predicting Transcription Factor Binding Sites from Combined DNA Sequence. 2021. /Lei Deng, Hui Liu/](https://doi.org/10.3390/ijms22115521)
+
+[dna2vec](https://arxiv.org/pdf/1701.06279.pdf)
+
+[kmer2vec](https://doi.org/10.1089/cmb.2021.0536)
+
+- 特征提取
+
+[Seq2Feature](https://doi.org/10.1093/bioinformatics/btz432)
+
+DNA 序列特征：
+|分类|条目|描述|
+|--|--|--|
+|Physicochemical properties|Stacking energy|
+||Enthalpy|
+||Entropy|
+||Flexibility_shift|
+||Flexibility_slide|
+||Free energy|
+||Melting Temperature|
+||Mobility to bend towards major groove|
+||Mobility to bend towards minor groove|
+||Probability contacting nucleosome core|
+||Rise stiffness|
+||Roll stiffness|
+||Shift stiffness|
+||Slide stiffness|
+||Tilt stiffness|
+||Twist stiffness|
+|Conformational properties|Bend|
+||Rise|
+||Roll|
+||Inclination|
+||Major Groove Depth|
+||Major Groove Distance|
+||Major Groove Size|
+||Major Groove Width|
+||Minor Groove Depth|
+||Minor Groove Distance|
+||Minor Groove Size|
+||Minor Groove Width|
+||Shift|
+||Propeller Twist|
+||Slide|
+||Tilt|
+||Tip|
+||Twist|
+|Nucleotide content|Adenine content|
+||Cytosine content|
+||GC content|
+||Guanine content|
+||Keto (GT) content|
+||Purine (AG) content|
+||Thymine content|
+||Pyrimidine (CT)|

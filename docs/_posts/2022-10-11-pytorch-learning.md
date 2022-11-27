@@ -470,6 +470,8 @@ Biult-in datasets.
 - [DenseNet](https://arxiv.org/pdf/1608.06993v5.pdf)
 ![densenet](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-06-20_at_11.35.53_PM_KroVKVL.png)
 
+- [ViT](https://arxiv.org/pdf/2010.11929v2.pdf)
+
 **1.2 目标检测**：
 
 - [R-CNN](https://arxiv.org/pdf/1311.2524v5.pdf)
@@ -491,6 +493,11 @@ Biult-in datasets.
 
 **1.4 样式迁移**：
 
+**1.5 图片生成**：
+
+- [GAN](https://arxiv.org/pdf/1406.2661v1.pdf), 对抗神经网络
+![gan](https://production-media.paperswithcode.com/methods/gan.jpeg)
+
 **2、序列**
 **2.1 文本分类**：
 
@@ -507,16 +514,23 @@ Biult-in datasets.
 
 - [Transformer](https://arxiv.org/pdf/1706.03762.pdf)
 ![transformer](https://production-media.paperswithcode.com/methods/new_ModalNet-21.jpg)
+[参考博客理解](https://jalammar.github.io/illustrated-transformer/)
 
 **2.3 NLP**:
 
 - [word2vec](https://arxiv.org/pdf/1411.2738.pdf)
 
+- [GPT](https://s3-us-west-2.amazonaws.com/openai-assets/research-covers/language-unsupervised/language_understanding_paper.pdf)
+![gpt](https://production-media.paperswithcode.com/methods/Screen_Shot_2020-05-27_at_12.41.44_PM.png)
+
 - [BERT](https://arxiv.org/pdf/1810.04805v2.pdf)
 ![bert](https://production-media.paperswithcode.com/methods/new_BERT_Overall.jpg)
+
+#### 图神经网路
+
+[GNN/GCN](https://distill.pub/2021/gnn-intro/)
+![gnn](https://distill.pub/2021/gnn-intro/Overall.e3af58ab.png)
 
 参考：  
 [跟李沐学AI-视频](https://space.bilibili.com/1567748478)  
 [动手学深度学习-参考书](http://zh.gluon.ai/)  
-
-
