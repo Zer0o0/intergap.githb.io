@@ -23,9 +23,8 @@ navbar-links:
   Home: "index"
   Resources:
     - Time: "https://time.is/zh/"
-    - Wallpapers: "https://wallhaven.cc/"
     - Xiangqi: "https://www.chessdb.cn/query/"
-    - Baimiao: "https://web.baimiaoapp.com/"
+    - Tooleyes: "https://www.tooleyes.com/"
     - More...: "moresource"
   Publications: "publication"
   About Me: "aboutme"
