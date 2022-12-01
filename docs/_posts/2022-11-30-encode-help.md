@@ -9,8 +9,8 @@ tags: [database, epigenetics]
 ![xxx](https://screen.encodeproject.org/assets/encode/classic-image3.jpg)
 
 参考：  
-[An integrated encyclopedia of DNA elements in the human genome. 2012](https://www.nature.com/articles/nature11247)
-[New developments on the Encyclopedia of DNA Elements (ENCODE) data portal. 2020](https://doi.org/10.1093/nar/gkz1062)
+[An integrated encyclopedia of DNA elements in the human genome. 2012](https://www.nature.com/articles/nature11247)  
+[New developments on the Encyclopedia of DNA Elements (ENCODE) data portal. 2020](https://doi.org/10.1093/nar/gkz1062)  
 [Expanded Encyclopaedias of DNA Elements in the Human and Mouse Genomes. 2020](https://www.nature.com/articles/s41586-020-2493-4)
 
 ### [数据组织](https://www.encodeproject.org/help/data-organization/)
@@ -39,7 +39,7 @@ tags: [database, epigenetics]
 
 数据统计信息：
 
-![xxx]({{ site.url }}/assets/img/mds/ENCODE3_production.png)
+![xxx]({{ '/assets/img/mds/ENCODE3_production.png' | relative_url }})
 
 - 质控标准
 
