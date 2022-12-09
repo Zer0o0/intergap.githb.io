@@ -13,7 +13,7 @@ tags: [database, epigenetics]
 [New developments on the Encyclopedia of DNA Elements (ENCODE) data portal. 2020](https://doi.org/10.1093/nar/gkz1062)  
 [Expanded Encyclopaedias of DNA Elements in the Human and Mouse Genomes. 2020](https://www.nature.com/articles/s41586-020-2493-4)
 
-### [数据组织](https://www.encodeproject.org/help/data-organization/)
+### [数据库架构](https://www.encodeproject.org/help/data-organization/)
 
 - 样本
 
