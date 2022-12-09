@@ -4,9 +4,11 @@ title: GRCh38 基因组统计数据
 tags: [genome, statistics]
 ---
 
-- GRCh38概况
+- GRCh38基本信息
 
-![xxx]({{ '/assets/img/mds/ann_gencode.png' | relative_url }})
+![xxx]({{ '/assets/img/mds/ann_ensembl.png' | relative_url }})
+
+![xxx]({{ '/assets/img/mds/ann_ncbi.png' | relative_url }})
 
 - 基因信息
 
@@ -14,7 +16,11 @@ tags: [genome, statistics]
 
 - 外显子和内含子信息
 
-![xxx]({{ '/assets/img/mds/exon_intron.png' | relative_url }})
+![xxx]({{ '/assets/img/mds/exon_intron_stat.png' | relative_url }})
+
+- GRCh37 基本信息
+
+![xxx]({{ '/assets/img/mds/GRCh37_stat.png' | relative_url }})
 
 **参考**：
 
