@@ -534,3 +534,4 @@ Biult-in datasets.
 参考：  
 [跟李沐学AI-视频](https://space.bilibili.com/1567748478)  
 [动手学深度学习-参考书](http://zh.gluon.ai/)  
+[李宏毅2021/2022机器学习课程](https://www.bilibili.com/video/BV1Wv411h7kN/?spm_id_from=333.999.0.0)
