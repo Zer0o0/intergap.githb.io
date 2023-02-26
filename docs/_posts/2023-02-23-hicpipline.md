@@ -4,17 +4,15 @@ title: 三维基因组
 tags: [HiC, Juicer, HiC-Pro, Docker]
 ---
 
-### HiC 原理
+### HiC 原理简单介绍
 
 [A 3D Map of the Human Genome at Kilobase Resolution Reveals Principles of Chromatin Looping](https://www.cell.com/fulltext/S0092-8674(14)01497-4)
 
-- Hi-C Models
-![](https://www.cell.com/cms/attachment/b1c99c9e-a7f9-42ed-9db6-ab60a4a435d8/fx1.jpg)
-
 - Hi-C protocol
+
 ![](https://www.cell.com/cms/attachment/6599fde9-c119-4849-bb0c-e01eb117e87e/gr1.jpg)
 
-- chromatin architecture:
+- Chromatin architecture:
 
 1. Megadomains: 5–20 Mb intervals  
 2. Topologically associated domains (TADs): ∼1 Mb  
@@ -48,29 +46,11 @@ cut -d: -f1 /etc/passwd  #查看系统所有用户
 
 **CPU信息展示**:
 
->processor       : 0  
->vendor_id       : GenuineIntel  
->cpu family      : 6  
->model           : 62  
->model name      : Intel(R) Xeon(R) CPU E5-2670 v2 @ 2.50GHz  
->stepping        : 4  
->microcode       : 0x42e  
->cpu MHz         : 1200.000  
->cache size      : 25600 KB  
->physical id     : 0  
->siblings        : 20  
->core id         : 0  
->cpu cores       : 10  
->apicid          : 0  
->initial apicid  : 0  
->fpu             : yes  
->fpu_exception   : yes  
->cpuid level     : 13  
->wp              : yes  
+![]({{ '/assets/img/hic/cpuinfo.png' | relative_url }})
 
 **GPU信息展示**：
 
-![]({{ '/assets/img/hic/tab2.png' | relative_url }})
+![]({{ '/assets/img/hic/gpuinfo.png' | relative_url }})
 
 >表头释义：  
 >Fan：显示风扇转速，数值在0到100%之间，是计算机的期望转速，如果计算机不是通过风扇冷却或者风扇坏了，显示出来就是N/A；  
@@ -242,12 +222,12 @@ hic.wdl的配置文件json内容如下：
 |calculate_stats|stats_~{quality}.txt, stats_~{quality}.json, stats_~{quality}_hists.m|关于比对结果的数据统计信息，默认保留MAPQ>0和MAPQ>30两种结果|
 |create_hic|inter_~{quality}_unnormalized.hic|生成原始.hic文件，及未经过标准化|
 |add_norm|inter_~{quality}.hic|标准化的.hic文件|
-|arrowhead|_~{quality}.bedpe.gz|Arrowhead Algorithm for Domain Annotation，compartmentalization概念的提出和解释|
+|arrowhead|_~{quality}.bedpe.gz|Arrowhead Algorithm for Domain Annotation，检测TADs|
 |hiccups|merged_loops_~{quality}.bedpe.gz|Hi-C Computational Unbiased Peak Search for Peak Calling，检测chromatin loops|
 |hiccups_2|merged_loops_~{quality}.bedpe.gz|-|
 |localizer|localized_loops_~{quality}.bedpe.gz|-|
 |delta|predicted_loops_merged.bedpe.gz, predicted_domains_merged.bedpe.gz, predicted_stripes_merged.bedpe.gz, predicted_loop_domains_merged.bedpe.gz|检测TAD、loops，参考[Delta](https://delta.ngdc.cncb.ac.cn/)|
-|create_eigenvector|eigenvector_~{resolution}.wig, eigenvector_~{resolution}.bw|Compartment A is highly enriched for open chromatin; compartment B is enriched for closed chromatin，分析区别A和B compartment|
+|create_eigenvector|eigenvector_~{resolution}.wig, eigenvector_~{resolution}.bw|Compartment A is highly enriched for open chromatin; compartment B is enriched for closed chromatin，分析区别compartment A和compartment B|
 |slice|slice_subcompartment_clusters_~{resolution}.bed.gz|-|
 |create_accessibility_track|inter_30.bw|-|
 ||||
@@ -292,6 +272,8 @@ Juicer pipeline consists of two main parts:
 2. the analysis portion, which operates on the binary file and automatically annotates contact domains, loops, anchors, and compartments.
 
 ![]({{ '/assets/img/hic/fig6.png' | relative_url }})
+![]({{ '/assets/img/hic/tab3.png' | relative_url }})
+![]({{ '/assets/img/hic/tab4.png' | relative_url }})
 
 - Fastqs to contact matrices
 
@@ -318,8 +300,6 @@ Juicer pipeline consists of two main parts:
 
 1. HiCCUPS: Hi-C Computational Unbiased Peak Search for Peak Calling  
 Much of the work on genome architecture so far has centered on the study of chromatin looping. **Chromatin loops manifest as local peaks in a proximity ligation dataset**, which occur between two points whenever they interact with each other significantly more than with random points in their neighborhood.
-
-![]({{ '/assets/img/hic/fig13.png' | relative_url }})
 
 - Visualization and Data Integration
 
