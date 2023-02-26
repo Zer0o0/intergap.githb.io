@@ -14,32 +14,36 @@ tags: [HiC, Juicer, HiC-Pro, Docker]
 - Hi-C protocol
 ![](https://www.cell.com/cms/attachment/6599fde9-c119-4849-bb0c-e01eb117e87e/gr1.jpg)
 
-- Compartments:
+- chromatin architecture:
 
 1. Megadomains: 5–20 Mb intervals  
 2. Topologically associated domains (TADs): ∼1 Mb  
 3. Contact domains are often preserved across cell types: 40 kb to 3 Mb (median size 185 kb)  
 4. Loops are short (<2 Mb) and strongly conserved across cell types and between human and mouse  
-5. Compartment A is highly enriched for open chromatin; compartment B is enriched for closed chromatin  
+5. Eigenvector: Compartment A is highly enriched for open chromatin; compartment B is enriched for closed chromatin  
 6. Genes whose promoters are associated with a loop are much more highly expressed than genes whose promoters are not associated with a loop (6-fold)
 
-![](https://www.cell.com/cms/attachment/5c2bf9c0-9842-4a5d-b7ee-8ff304760d04/gr6.jpg)
+![]({{ '/assets/img/hic/chromatin.png' | relative_url }})
+[ref: Current Opinion in Genetics & Development, Izabela Harabula. 2021](https://doi.org/10.1016/j.gde.2020.12.008)
 
 ---
 
 ### 电脑配置信息
 
 ```sh
-uname -a  查看内核/操作系统/CPU信息
+uname -a  查看内核/操作系统
 #Linux chunyu-PowerEdge-R720 5.13.0-43-generic #48~20.04.1-Ubuntu SMP Thu May 12 12:59:19 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
 df -h  #硬盘信息
 #文件系统                                          容量  已用  可用 已用% 挂载点
 #rpool/USERDATA/lxh_gscj6g                        46T   298G  46T  1%   /home/lxh
 #rpool/ROOT/ubuntu_ktv56z/usr/local               46T   3.7G  46T  1%   /usr/local
-cat /proc/cpuinfo  #
-
-cut -d: -f1 /etc/passwd  #查看系统所有用户
+free -h  #内存信息
+#              总计         已用        空闲      共享    缓冲/缓存    可用
+#内存：       503Gi         260Gi       241Gi     10Mi   1.3Gi        240Gi
+#交换：       2.0Gi         0B          2.0Gi
+cat /proc/cpuinfo  #查看CPU信息
 nvidia-smi  #查看GPU信息和使用情况
+cut -d: -f1 /etc/passwd  #查看系统所有用户
 ```
 
 **CPU信息展示**:
@@ -63,34 +67,11 @@ nvidia-smi  #查看GPU信息和使用情况
 >fpu_exception   : yes  
 >cpuid level     : 13  
 >wp              : yes  
->flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt dtherm ida arat pln pts md_clear flush_l1d  
->vmx flags       : vnmi preemption_timer posted_intr invvpid ept_x_only ept_1gb flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid ple  
->bugs            : cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs  >itlb_multihitbogomips        : 4999.96  
->clflush size    : 64  
->cache_alignment : 64  
->address sizes   : 46 bits physical, 48 bits virtual
 
 **GPU信息展示**：
 
->+-----------------------------------------------------------------------------+  
->| NVIDIA-SMI 470.129.06   Driver Version: 470.129.06   CUDA Version: 11.4     |  
->|-------------------------------+----------------------+----------------------+  
->| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |  
->| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |  
->|                               |                      |               MIG M. |  
->|===============================+======================+======================|  
->|   0  Tesla M40 24GB      Off  | 00000000:04:00.0 Off |                  Off |  
->| N/A   28C    P8    15W / 250W |      4MiB / 24478MiB |      0%      Default |  
->|                               |                      |                  N/A |  
->+-------------------------------+----------------------+----------------------+  
->  
->+-----------------------------------------------------------------------------+  
->| Processes:                                                                  |  
->|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |  
->|        ID   ID                                                   Usage      |  
->|=============================================================================|  
->|    0   N/A  N/A      3448      G   /usr/lib/xorg/Xorg                  3MiB |  
->+-----------------------------------------------------------------------------+  
+![]({{ '/assets/img/hic/tab2.png' | relative_url }})
+
 >表头释义：  
 >Fan：显示风扇转速，数值在0到100%之间，是计算机的期望转速，如果计算机不是通过风扇冷却或者风扇坏了，显示出来就是N/A；  
 >Temp：显卡内部的温度，单位是摄氏度；  
@@ -250,23 +231,23 @@ hic.wdl的配置文件json内容如下：
 
 |task|outfiles|description|
 |--|--|--|
-|get_ligation_site_regex|ligation_site_regex.txt|-|
-|normalize_assembly_name|normalized_assembly_name.txt, is_supported.txt|-|
-|align|aligned.bam, ligation_count.txt|-|
-|chimeric_sam_specific|chimeric_sam_specific.bam, result_norm.txt.res.txt|-|
-|merge|merged.bam|-|
-|dedup|merged_dedup.bam|-|
+|get_ligation_site_regex|ligation_site_regex.txt|酶切位点|
+|normalize_assembly_name|normalized_assembly_name.txt, is_supported.txt|参考基因组标识，如GRCm38|
+|align|aligned.bam, ligation_count.txt|数据比对结果文件|
+|chimeric_sam_specific|chimeric_sam_specific.bam, result_norm.txt.res.txt|比对文件中的chimeric reads，保留的unambiguous部分？|
+|merge|merged.bam|合并比对结果文件，包括R1和R2的正常比对以及部分的unambiguous chimeric read|
+|dedup|merged_dedup.bam|去除PCR重复后的比对文件|
+|bam_to_pre|merged_nodups_~{quality}.txt.gz, merged_nodups_~{quality}_index.txt.gz|生成.hic文件的中间文件，详见[Juicer-Pre](https://github.com/aidenlab/juicer/wiki/Pre#file-format)|
 |pre_to_pairs|pairix.bsorted.pairs.gz|-|
-|bam_to_pre|merged_nodups_~{quality}.txt.gz, merged_nodups_~{quality}_index.txt.gz|-|
-|calculate_stats|stats_~{quality}.txt, stats_~{quality}.json, stats_~{quality}_hists.m|-|
-|create_hic|inter_~{quality}_unnormalized.hic|-|
-|add_norm|inter_~{quality}.hic|-|
-|arrowhead|_~{quality}.bedpe.gz|-|
-|hiccups|merged_loops_~{quality}.bedpe.gz|-|
+|calculate_stats|stats_~{quality}.txt, stats_~{quality}.json, stats_~{quality}_hists.m|关于比对结果的数据统计信息，默认保留MAPQ>0和MAPQ>30两种结果|
+|create_hic|inter_~{quality}_unnormalized.hic|生成原始.hic文件，及未经过标准化|
+|add_norm|inter_~{quality}.hic|标准化的.hic文件|
+|arrowhead|_~{quality}.bedpe.gz|Arrowhead Algorithm for Domain Annotation，compartmentalization概念的提出和解释|
+|hiccups|merged_loops_~{quality}.bedpe.gz|Hi-C Computational Unbiased Peak Search for Peak Calling，检测chromatin loops|
 |hiccups_2|merged_loops_~{quality}.bedpe.gz|-|
 |localizer|localized_loops_~{quality}.bedpe.gz|-|
-|delta|predicted_loops_merged.bedpe.gz, predicted_domains_merged.bedpe.gz, predicted_stripes_merged.bedpe.gz, predicted_loop_domains_merged.bedpe.gz|-|
-|create_eigenvector|eigenvector_~{resolution}.wig, eigenvector_~{resolution}.bw|-|
+|delta|predicted_loops_merged.bedpe.gz, predicted_domains_merged.bedpe.gz, predicted_stripes_merged.bedpe.gz, predicted_loop_domains_merged.bedpe.gz|检测TAD、loops，参考[Delta](https://delta.ngdc.cncb.ac.cn/)|
+|create_eigenvector|eigenvector_~{resolution}.wig, eigenvector_~{resolution}.bw|Compartment A is highly enriched for open chromatin; compartment B is enriched for closed chromatin，分析区别A和B compartment|
 |slice|slice_subcompartment_clusters_~{resolution}.bed.gz|-|
 |create_accessibility_track|inter_30.bw|-|
 ||||
@@ -280,10 +261,13 @@ hic.wdl的配置文件json内容如下：
 
 2. Unable to find image 'encodedcc/hic-pipeline@ locally  
 可能是因为网络原因，无法直接从[docker hub](https://hub.docker.com/) pull相关的image，  
-解决方法：1）创建本地目录encodedcc，将docker目录中的镜像文件Dockerfile进行复制，  
+解决方法：  
+1）创建本地目录encodedcc，将docker目录中的镜像文件Dockerfile进行复制，  
 *cp -r docker/ encodedcc/*  
-这样的话好像首次次运行会根据Dockerfile创建相应的容器，会耗费一定时间。2）也可自行创建容器，
-*docker build -t encodedcc/hic-pipeline:1.15.1 -f docker/hic-pipeline/Dockerfile*
+这样的话好像首次次运行会根据Dockerfile创建相应的容器，会耗费一定时间。
+2）也可自行创建容器，  
+*cd docker/hic-pipeline*  
+*docker build -t encodedcc/hic-pipeline:1.15.1 .*
 
 #### HiC数据说明
 
@@ -314,7 +298,7 @@ Juicer pipeline consists of two main parts:
 1. Sequence alignment  
 1.1 Filtering of abnormal alignments  
 **normal**:  each read in a read pair will align to a single site in the genome.  
-**chimeric**: at least one of the two reads comprises multiple subsequences, each of which align to different parts of the genome. For instance, the first 50 base pairs might map perfectly to one position, whereas the next 50 map perfectly to a second position several megabases away. Chimeric read pairs are classified as **"unambiguous"** or **"ambiguous"**.  
+**chimeric**: at least one of the two reads comprises multiple subsequences, each of which align to different parts of the genome. For instance, the first 50 base pairs might map perfectly to one position, whereas the next 50 map perfectly to a second position several megabases away. Chimeric read pairs are classified as **"unambiguous"** or **"ambiguous"**, ambiguous chimeric reads are not included in Hi-C maps.  
 **unalignable**: they have at least one end that cannot be successfully aligned.  
 1.2 Filtering of duplicates  
 1.3 Filtering of low-quality alignments  
@@ -528,22 +512,22 @@ cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
 #HindIII
 ----------------
 5' A^AGCTT 3'
-3' TTCGA^A 5'
+3'  TTCGA^A 5'
 ----------------
 #BglII
 ----------------
 5' A^GATCT 3'
-3' TCTAG^A 5'
+3'  TCTAG^A 5'
 ----------------
 #DpnII
 ----------------
 5' ^GATC 3'
-3' CTAG^ 5'
+3'  CTAG^ 5'
 ----------------
 #MboI
 ----------------
 5' ^GATC 3'
-3' CTAG^ 5'
+3'  CTAG^ 5'
 ----------------
 ##HiC-Pro
 #GRCh38
@@ -572,10 +556,12 @@ cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
 }
 
 caper run ../make_restriction_site_locations.wdl -i restriction_site_locations.json --docker
-#也可直接下载
+#也可直接下载，mm10的链接有访问权限，只能下载到GRCh38的文件
 #DpnII, MboI  GRCh38
 wget https://www.encodeproject.org/files/ENCFF132WAM/@@download/ENCFF132WAM.txt.gz
 #HindIII  GRCh38
 https://www.encodeproject.org/files/ENCFF984SUZ/@@download/ENCFF984SUZ.txt.gz
 
 ```
+
+---
