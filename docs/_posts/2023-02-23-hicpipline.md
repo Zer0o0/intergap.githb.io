@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 三维基因组分析之Juicer
-tags: [HiC, Juicer, HiC-Pro, Docker]
+tags: [HiC, Juicer, Docker]
 ---
 
 ### HiC 原理
@@ -153,6 +153,7 @@ caper run hic.wdl -i tests/functional/json/test_hic.json --docker
 3. 输入文件  
 需要准备文件包括测序数据，参考基因组序列文件（生成酶切片段），参考基因组bwa索引文件，参考基因组染色体大小文件，参考基因组酶切片段坐标信息文件。  
 hic.wdl的配置文件json内容如下：
+
 ```json
 {
   "hic.assembly_name": "ce10",
@@ -205,6 +206,7 @@ hic.wdl的配置文件json内容如下：
   "hic.create_accessibility_track_disk_size_gb": 
 }
 ```
+
 4. 输出文件
 
 |task|outfiles|description|
