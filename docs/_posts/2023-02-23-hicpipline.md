@@ -148,11 +148,12 @@ caper run hic.wdl -i tests/functional/json/test_hic.json --docker
 
 #### 使用指南
 
-1. 在hic-pipeline的根目录下使用，每次使用将会在目录下生成日志文件cromwell.out和目录cromwell-workflow-logs，以及结果文件存放目录hic，每次运行将随机产生序列号
-2. 配置文件（json格式）的设置，参考[Workflows说明](https://github.com/ENCODE-DCC/hic-pipeline/blob/dev/docs/reference.md)
-3. 输入文件  
-需要准备文件包括测序数据，参考基因组序列文件（生成酶切片段），参考基因组bwa索引文件，参考基因组染色体大小文件，参考基因组酶切片段坐标信息文件。  
-hic.wdl的配置文件json内容如下：
+- JSON配置文件  
+参考[Workflows说明](https://github.com/ENCODE-DCC/hic-pipeline/blob/dev/docs/reference.md)
+
+- 输入文件  
+需要准备文件包括测序数据，参考基因组序列文件，参考基因组bwa索引文件，参考基因组染色体大小文件，参考基因组酶切片段坐标信息文件。  
+hic.wdl的json配置文件内容如下：
 
 ```json
 {
@@ -207,10 +208,11 @@ hic.wdl的配置文件json内容如下：
 }
 ```
 
-4. 输出文件
+- 输出文件  
+首次运行会在工作目录下生成hic目录，此后在同一目录下的计算，会在hic目录下生成随机序列的目录，内存放运行结果文件，相关文件如下：
 
 |task|outfiles|description|
-|--|--|--|
+|--|----|------------|
 |get_ligation_site_regex|ligation_site_regex.txt|酶切位点|
 |normalize_assembly_name|normalized_assembly_name.txt, is_supported.txt|参考基因组标识，如GRCm38|
 |align|aligned.bam, ligation_count.txt|数据比对结果文件|
@@ -232,29 +234,28 @@ hic.wdl的配置文件json内容如下：
 |create_accessibility_track|inter_30.bw|-|
 ||||
 
-**问题集合**:
+- 问题集合
 
 1. docker: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock  
 解决方法：将用户加入docker组，  
-*sudo gpasswd -a username docker;*  
-*newgrp docker*
+`sudo gpasswd -a username docker;`  
+`newgrp docker`
 
 2. Unable to find image 'encodedcc/hic-pipeline@ locally  
 可能是因为网络原因，无法直接从[docker hub](https://hub.docker.com/) pull相关的image，  
 解决方法：  
 1）创建本地目录encodedcc，将docker目录中的镜像文件Dockerfile进行复制，  
-*cp -r docker/ encodedcc/*  
+`cp -r docker/ encodedcc/`  
 这样的话好像首次次运行会根据Dockerfile创建相应的容器，会耗费一定时间。
 2）也可自行创建容器，  
-*cd docker/hic-pipeline*  
-*docker build -t encodedcc/hic-pipeline:1.15.1 .*
+`cd docker/hic-pipeline`  
+`docker build -t encodedcc/hic-pipeline:1.15.1 .`
 
 3. 注意，*hic.reference_index*提供文件为tar.gz格式，包括参考基因组bwa的index文件及序列文件
 
 #### HiC数据说明
 
-参考[Data Production and Processing Standard of 
-the Hi-C Mapping Center](https://www.encodeproject.org/documents/75926e4b-77aa-4959-8ca7-87efcba39d79/@@download/attachment/comp_doc_7july2018_final.pdf)
+参考[Data Production and Processing Standard of the Hi-C Mapping Center](https://www.encodeproject.org/documents/75926e4b-77aa-4959-8ca7-87efcba39d79/@@download/attachment/comp_doc_7july2018_final.pdf)
 
 #### Quality Control
 
@@ -311,15 +312,13 @@ Much of the work on genome architecture so far has centered on the study of chro
 
 ---
 
----
-
 ### 参考基因组
 
 ```sh
 ##下载序列文件和注释文件
 #对于人类和小鼠，从GENCODE (https://www.gencodegenes.org/) 下载参考基因组序列文件和注释文件
 #Genome assembly GRCh38 /2023-02-08
-wget -c https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/GRCh38.primary_assembly.genome.fa.gz
+wget -c https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/GRCh38.primary_assembly.genome.fa.gz  #-c，断点续传
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.annotation.gff3.gz
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.annotation.gtf.gz
 
