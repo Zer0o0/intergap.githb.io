@@ -1,10 +1,10 @@
 ---
 layout: post
-title: 三维基因组
+title: 三维基因组分析之Juicer
 tags: [HiC, Juicer, HiC-Pro, Docker]
 ---
 
-### HiC 原理简单介绍
+### HiC 原理
 
 [A 3D Map of the Human Genome at Kilobase Resolution Reveals Principles of Chromatin Looping](https://www.cell.com/fulltext/S0092-8674(14)01497-4)
 
@@ -42,6 +42,7 @@ free -h  #内存信息
 cat /proc/cpuinfo  #查看CPU信息
 nvidia-smi  #查看GPU信息和使用情况
 cut -d: -f1 /etc/passwd  #查看系统所有用户
+pstree -aps pid  #查看进程关系
 ```
 
 **CPU信息展示**:
@@ -149,11 +150,9 @@ caper run hic.wdl -i tests/functional/json/test_hic.json --docker
 
 1. 在hic-pipeline的根目录下使用，每次使用将会在目录下生成日志文件cromwell.out和目录cromwell-workflow-logs，以及结果文件存放目录hic，每次运行将随机产生序列号
 2. 配置文件（json格式）的设置，参考[Workflows说明](https://github.com/ENCODE-DCC/hic-pipeline/blob/dev/docs/reference.md)
-
 3. 输入文件  
 需要准备文件包括测序数据，参考基因组序列文件（生成酶切片段），参考基因组bwa索引文件，参考基因组染色体大小文件，参考基因组酶切片段坐标信息文件。  
 hic.wdl的配置文件json内容如下：
-
 ```json
 {
   "hic.assembly_name": "ce10",
@@ -203,10 +202,9 @@ hic.wdl的配置文件json内容如下：
   "hic.add_norm_ram_gb": ,
   "hic.add_norm_disk_size_gb": ,
   "hic.create_accessibility_track_ram_gb": ,
-  "hic.create_accessibility_track_disk_size_gb": ,
+  "hic.create_accessibility_track_disk_size_gb": 
 }
 ```
-
 4. 输出文件
 
 |task|outfiles|description|
@@ -217,7 +215,7 @@ hic.wdl的配置文件json内容如下：
 |chimeric_sam_specific|chimeric_sam_specific.bam, result_norm.txt.res.txt|比对文件中的chimeric reads，保留的unambiguous部分？|
 |merge|merged.bam|合并比对结果文件，包括R1和R2的正常比对以及部分的unambiguous chimeric read|
 |dedup|merged_dedup.bam|去除PCR重复后的比对文件|
-|bam_to_pre|merged_nodups_~{quality}.txt.gz, merged_nodups_~{quality}_index.txt.gz|生成.hic文件的中间文件，详见[Juicer-Pre](https://github.com/aidenlab/juicer/wiki/Pre#file-format)|
+|bam_to_pre|merged_nodups_~{quality}.txt.gz, merged_nodups_~{quality}_index.txt.gz|生成.hic文件的中间文件，详见[Juicer-Pre](https://github.com/aidenlab/juicer/wiki/Pre#file-format)，考虑了fragment跨越酶切位置信息，保留跨越至少一个位置，即R1和R2分布在两个或以上酶切片段|
 |pre_to_pairs|pairix.bsorted.pairs.gz|-|
 |calculate_stats|stats_~{quality}.txt, stats_~{quality}.json, stats_~{quality}_hists.m|关于比对结果的数据统计信息，默认保留MAPQ>0和MAPQ>30两种结果|
 |create_hic|inter_~{quality}_unnormalized.hic|生成原始.hic文件，及未经过标准化|
@@ -248,6 +246,8 @@ hic.wdl的配置文件json内容如下：
 2）也可自行创建容器，  
 *cd docker/hic-pipeline*  
 *docker build -t encodedcc/hic-pipeline:1.15.1 .*
+
+3. 注意，*hic.reference_index*提供文件为tar.gz格式，包括参考基因组bwa的index文件及序列文件
 
 #### HiC数据说明
 
@@ -309,156 +309,6 @@ Much of the work on genome architecture so far has centered on the study of chro
 
 ---
 
-### HiC-Pro 分析
-
-[HiC-Pro](https://github.com/nservant/HiC-Pro) was designed to process Hi-C data, from raw fastq files (paired-end Illumina data) to normalized contact maps.
-![](http://nservant.github.io/HiC-Pro/_images/hicpro_wkflow.png)
-
-#### 简单使用
-
-```sh
-HiC-Pro -i FULL_PATH_TO_DATA_FOLDER -o FULL_PATH_TO_OUTPUTS -c MY_LOCAL_CONFIG_FILE
-
-# FULL_PATH_TO_DATA_FOLDER structure
-   + FULL_PATH_TO_DATA_FOLDER
-     + sample1
-       ++ file1_R1.fastq.gz
-       ++ file1_R2.fastq.gz
-       ++ ...
-     + sample2
-       ++ file1_R1.fastq.gz
-       ++ file1_R2.fastq.gz
-     *...
-```
-
-#### 使用指南
-
-详细参考[HIC-PRO](http://nservant.github.io/HiC-Pro/MANUAL.html)
-
-- 安装（基于conda环境）
-
-```sh
-git clone https://github.com/nservant/HiC-Pro.git
-cd HiC-Pro
-conda env create -f environment.yml  #将name改为hicenv
-conda activate hicenv
-
-make configure
-make install
-echo 'export PATH="/usr/local/bin/HiC-Pro_3.1.0/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-
-HiC-Pro --help
-```
-
-- 输入文件
-
-测序数据，参考基因组bowtie2索引文件，参考基因组染色体大小文件及参考基因组酶切片段坐标信息文件（bed格式），  
-config配置文件如下：
-
-```python
-# Please change the variable settings below if necessary
-
-#########################################################################
-## Paths and Settings  - Do not edit !
-#########################################################################
-
-TMP_DIR = tmp
-LOGS_DIR = logs
-BOWTIE2_OUTPUT_DIR = bowtie_results
-MAPC_OUTPUT = hic_results
-RAW_DIR = rawdata
-
-#######################################################################
-## SYSTEM AND SCHEDULER - Start Editing Here !!
-#######################################################################
-N_CPU = 12
-SORT_RAM = 1000M
-LOGFILE = hicpro.log
-
-JOB_NAME = 
-JOB_MEM = 
-JOB_WALLTIME = 
-JOB_QUEUE = 
-JOB_MAIL = 
-
-#########################################################################
-## Data
-#########################################################################
-
-PAIR1_EXT = _R1
-PAIR2_EXT = _R2
-
-#######################################################################
-## Alignment options
-#######################################################################
-
-MIN_MAPQ = 10
-
-BOWTIE2_IDX_PATH = /home/lxh/HiC_test/refgenomes/indexs/GRCh38/bowtie2index
-BOWTIE2_GLOBAL_OPTIONS = --very-sensitive -L 30 --score-min L,-0.6,-0.2 --end-to-end --reorder
-BOWTIE2_LOCAL_OPTIONS =  --very-sensitive -L 20 --score-min L,-0.6,-0.2 --end-to-end --reorder
-
-#######################################################################
-## Annotation files
-#######################################################################
-
-REFERENCE_GENOME = refgen
-GENOME_SIZE = /home/lxh/HiC_test/refgenomes/chromsizes/GRCh38.chrom.sizes
-
-#######################################################################
-## Allele specific analysis
-#######################################################################
-
-ALLELE_SPECIFIC_SNP = 
-
-#######################################################################
-## Capture Hi-C analysis
-#######################################################################
-
-CAPTURE_TARGET =
-REPORT_CAPTURE_REPORTER = 1
-
-#######################################################################
-## Digestion Hi-C
-#######################################################################
-
-GENOME_FRAGMENT = /home/lxh/HiC_test/refgenomes/enzymesites/hicpro/GRCh38_mboi_or_dpnii.bed
-LIGATION_SITE = GATC
-MIN_FRAG_SIZE = 
-MAX_FRAG_SIZE =
-MIN_INSERT_SIZE =
-MAX_INSERT_SIZE =
-
-#######################################################################
-## Hi-C processing
-#######################################################################
-
-MIN_CIS_DIST =
-GET_ALL_INTERACTION_CLASSES = 1
-GET_PROCESS_SAM = 0
-RM_SINGLETON = 1
-RM_MULTI = 1
-RM_DUP = 1
-
-#######################################################################
-## Contact Maps
-#######################################################################
-
-BIN_SIZE = 20000 40000 150000 500000 1000000
-MATRIX_FORMAT = upper
-
-#######################################################################
-## Normalization
-#######################################################################
-MAX_ITER = 100
-FILTER_LOW_COUNT_PERC = 0.02
-FILTER_HIGH_COUNT_PERC = 0
-EPS = 0.1
-```
-
-- 输出文件
-
 ---
 
 ### 参考基因组
@@ -478,15 +328,15 @@ wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/genco
 
 ##构建index文件
 #GRCh38
-bowtie2-build --threads 24 /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa refgen
-bwa index -p refgen -a bwtsw /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa
+bwa index -p GRCh38.primary_assembly.genome.fa.gz -a bwtsw /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa
 #GRCm38
-bowtie2-build --threads 24 /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa refgen
-bwa index -p refgen -a bwtsw /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
+bwa index -p GRCm38.primary_assembly.genome.fa.gz -a bwtsw /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
 
 #染色体大小
 samtools faidx GRCh38.primary_assembly.genome.fa
 cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
+samtools faidx GRCm38.primary_assembly.genome.fa
+cut -f1,2 GRCm38.primary_assembly.genome.fa.fai > GRCm38.chrom.sizes
 
 ##酶切片段文件
 #HindIII
@@ -509,18 +359,6 @@ cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
 5' ^GATC 3'
 3'  CTAG^ 5'
 ----------------
-##HiC-Pro
-#GRCh38
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r A^AGCTT -o GRCh38_hindiii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa  #HindIII
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r hindiii -o GRCh38_hindiii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa  #效果同上
-# /usr/local/bin/HiC-Pro_3.1.0/utils/digest_genome.py -r hindiii dpnii -o GRCh38_hindiii_dpnii.bed /home/lxh/HiC_test/refgenome/sequences/GRCh38/GRCh38.primary_assembly.genome.fa  #双酶切
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r mboi -o GRCh38_mboi_or_dpnii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r bglii -o GRCh38_bglii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCh38/GRCh38.primary_assembly.genome.fa
-
-#GRCm38
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r hindiii -o GRCm38_hindiii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r mboi -o GRCm38_mboi_or_dpnii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
-/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r bglii -o GRCm38_bglii.bed /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
 
 ##juicer
 # 'HindIII'     : 'AAGCTT',
@@ -536,12 +374,83 @@ cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
 }
 
 caper run ../make_restriction_site_locations.wdl -i restriction_site_locations.json --docker
+#生成文件GRCm38_DpnII.txt.gz
+
 #也可直接下载，mm10的链接有访问权限，只能下载到GRCh38的文件
 #DpnII, MboI  GRCh38
 wget https://www.encodeproject.org/files/ENCFF132WAM/@@download/ENCFF132WAM.txt.gz
 #HindIII  GRCh38
 https://www.encodeproject.org/files/ENCFF984SUZ/@@download/ENCFF984SUZ.txt.gz
-
 ```
 
 ---
+
+### 一次hic数据分析过程
+
+- 数据信息
+
+物种：小鼠
+|样本名|实验条件|数据|
+|--|--|--|
+|EKO4d-1|KO|EKO4d-1_R1.fq.gz, EKO4d-1_R2.fq.gz|
+|EKO4d-2|KO|EKO4d-2_R1.fq.gz, EKO4d-2_R2.fq.gz|
+|WT4d-1|WT|WT4d-1_R1.fq.gz, WT4d-1_R2.fq.gz|
+|WT4d-2|WT|WT4d-2_R1.fq.gz, WT4d-2_R2.fq.gz|
+
+- 质控
+
+```sh
+conda activate hicenv  #激活conda环境
+conda install -c bioconda multiqc
+
+cd PATH_TO_RAW_DATA
+mkdir fastqc
+fastqc -o fastqc/ -t 24 ./*.fq.gz
+multiqc .
+```
+
+- 运行hic分析流程
+
+```sh
+mkdir hic_run && cd hic_run
+nano input.json  #json配置文件
+caper run /home/lxh/HiC_test/hic-pipeline/hic.wdl -i input.json --docker
+```
+
+JSON文件如下
+
+```json
+{
+  "hic.assembly_name": "GRCm38",
+  "hic.chrsz": "/home/lxh/HiC_test/refgenomes/chromsizes/GRCm38.chrom.sizes",
+  "hic.fastq": [
+    [
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-1_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-1_R2.fq.gz"
+      },
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-2_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-2_R2.fq.gz"
+      }
+    ],
+    [
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-1_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-1_R2.fq.gz"
+      },
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-2_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-2_R2.fq.gz"
+      }
+    ]
+  ],
+  "hic.reference_index": "/home/lxh/HiC_test/refgenomes/indexs/GRCm38/bwaindex/GRCm38.primary_assembly.genome.tar.gz",
+  "hic.restriction_enzymes": [
+    "DpnII"
+  ],
+  "hic.restriction_sites": "/home/lxh/HiC_test/refgenomes/enzymesites/juicer/GRCm38_DpnII.txt.gz"
+}
+```
+
+- 下游分析和可视化
