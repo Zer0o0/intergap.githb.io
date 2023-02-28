@@ -8,6 +8,10 @@ tags: [DNA, Computational biology]
 
 [Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid](https://www.nature.com/articles/171737a0)
 
+|||
+|--|--|
+|![Animal cell diagram](https://upload.wikimedia.org/wikipedia/commons/1/11/Animal_Cell.svg)|Components of a typical animal cell: 1.Nucleolus, 2.Nucleus, 3.Ribosome, 4.Vesicle, 5.Rough endoplasmic reticulum, 6.Golgi apparatus, 7.Cytoskeleton, 8.Smooth endoplasmic reticulum, 9.Mitochondrion, 10.Vacuole, 11.Cytosol, 12.Lysosome, 13.Centrosome, 14.Cell membrane|
+
 - Wiki
 
 [DNA](https://en.wikipedia.org/wiki/DNA)  
@@ -17,9 +21,8 @@ tags: [DNA, Computational biology]
 [RNA](https://en.wikipedia.org/wiki/RNA)  
 [Protein](https://en.wikipedia.org/wiki/Protein)  
 
-![Animal cell diagram](https://upload.wikimedia.org/wikipedia/commons/1/11/Animal_Cell.svg)
-![3D structure of the protein myoglobin showing turquoise α-helices](https://upload.wikimedia.org/wikipedia/commons/6/60/Myoglobin.png)
 ![A ribosome produces a protein using mRNA as template](https://upload.wikimedia.org/wikipedia/commons/b/b1/Ribosome_mRNA_translation_en.svg)
+![3D structure of the protein myoglobin showing turquoise α-helices](https://upload.wikimedia.org/wikipedia/commons/6/60/Myoglobin.png)
 
 [Gene](https://en.wikipedia.org/wiki/Gene)  
 [Central dogma](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology)  
@@ -80,6 +83,7 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 - fasta
 
 [FASTA format](https://en.wikipedia.org/wiki/FASTA_format)  
+[K-mer](https://en.wikipedia.org/wiki/K-mer)
 
 - fastq
 
@@ -101,7 +105,6 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 ![Eukaryotic protein-coding gene](https://upload.wikimedia.org/wikipedia/commons/5/54/Gene_structure_eukaryote_2_annotated.svg)
 ![Prokaryotic operon of protein-coding genes](https://upload.wikimedia.org/wikipedia/commons/f/fd/Gene_structure_prokaryote_2_annotated.svg)
-
 
 - toolkits
 
