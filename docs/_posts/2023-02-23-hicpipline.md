@@ -241,12 +241,12 @@ hic.wdl的json配置文件内容如下：
 `sudo gpasswd -a username docker;`  
 `newgrp docker`
 
-2. Unable to find image 'encodedcc/hic-pipeline@ locally  
+2. Unable to find image 'encodedcc/hic-pipeline@xxx' locally  
 可能是因为网络原因，无法直接从[docker hub](https://hub.docker.com/) pull相关的image，  
 解决方法：  
 1）创建本地目录encodedcc，将docker目录中的镜像文件Dockerfile进行复制，  
 `cp -r docker/ encodedcc/`  
-这样的话好像首次次运行会根据Dockerfile创建相应的容器，会耗费一定时间。
+这样的话好像首次运行会根据Dockerfile创建相应的容器，会耗费一定时间。
 2）也可自行创建容器，  
 `cd docker/hic-pipeline`  
 `docker build -t encodedcc/hic-pipeline:1.15.1 .`
@@ -391,6 +391,7 @@ https://www.encodeproject.org/files/ENCFF984SUZ/@@download/ENCFF984SUZ.txt.gz
 - 数据信息
 
 物种：小鼠
+
 |样本名|实验条件|数据|
 |--|--|--|
 |EKO4d-1|KO|EKO4d-1_R1.fq.gz, EKO4d-1_R2.fq.gz|
