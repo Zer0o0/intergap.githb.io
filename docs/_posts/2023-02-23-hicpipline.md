@@ -39,7 +39,10 @@ free -h  #内存信息
 #              总计         已用        空闲      共享    缓冲/缓存    可用
 #内存：       503Gi         260Gi       241Gi     10Mi   1.3Gi        240Gi
 #交换：       2.0Gi         0B          2.0Gi
-cat /proc/cpuinfo  #查看CPU信息
+cat /proc/cpuinfo  #CPU信息
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l  #CPU数
+cat /proc/cpuinfo | grep "cpu cores" | uniq  #每个CPU物理核心数
+cat /proc/cpuinfo| grep "processor"| wc -l  #逻辑CPU数
 nvidia-smi  #查看GPU信息和使用情况
 cut -d: -f1 /etc/passwd  #查看系统所有用户
 pstree -aps pid  #查看进程关系
@@ -333,6 +336,7 @@ bwa index -p GRCh38.primary_assembly.genome.fa.gz -a bwtsw /home/lxh/HiC_test/re
 #GRCm38
 bwa index -p GRCm38.primary_assembly.genome.fa.gz -a bwtsw /home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa
 
+
 #染色体大小
 samtools faidx GRCh38.primary_assembly.genome.fa
 cut -f1,2 GRCh38.primary_assembly.genome.fa.fai > GRCh38.chrom.sizes
@@ -367,24 +371,32 @@ cut -f1,2 GRCm38.primary_assembly.genome.fa.fai > GRCm38.chrom.sizes
 # 'MboI'        : 'GATC',
 # 'Sau3AI'      : 'GATC',
 # 'Arima'       : [ 'GATC', 'GANTC' ]
+
+mkdir enzymesizes && cd enzymesizes
+nano restriction_site_locations.json
+caper run ../make_restriction_site_locations.wdl -i restriction_site_locations.json --docker
+
 #restriction_site_locations.json
 {
   "make_restriction_site_locations.reference_fasta": "/home/lxh/HiC_test/refgenomes/sequences/GRCm38/GRCm38.primary_assembly.genome.fa",
   "make_restriction_site_locations.restriction_enzyme": "DpnII",
   "make_restriction_site_locations.assembly_name": "GRCm38"
 }
-
-caper run ../make_restriction_site_locations.wdl -i restriction_site_locations.json --docker
-#生成文件GRCm38_DpnII.txt.gz
-
-#也可直接下载，mm10的链接有访问权限，只能下载到GRCh38的文件
-#DpnII, MboI  GRCh38
-wget https://www.encodeproject.org/files/ENCFF132WAM/@@download/ENCFF132WAM.txt.gz
-#HindIII  GRCh38
-https://www.encodeproject.org/files/ENCFF984SUZ/@@download/ENCFF984SUZ.txt.gz
 ```
 
+**可从ENCODE下载相关文件**:
+
+|reference file|assembly|ENCODE portal link|
+|--|--|--|
+|bwa index|GRCh38|[link](https://www.encodeproject.org/files/ENCFF643CGH/)|
+|genome fasta|GRCh38|[link](https://www.encodeproject.org/files/GRCh38_no_alt_analysis_set_GCA_000001405.15/)|
+|chromosome sizes|GRCh38|[link](https://www.encodeproject.org/files/GRCh38_EBV.chrom.sizes/)|
+|bwa index|mm10|[link](https://www.encodeproject.org/files/ENCFF018NEO/)|
+|chromosome sizes|mm10|[link](https://www.encodeproject.org/files/mm10_no_alt.chrom.sizes/)|
+
 ---
+
+**注意**：NCBI-RefSeq、NCBI-GenBank、GENCODE、UCSC、Ensembl、ENCODE各个数据库的参考基因组对染色体的标识并不完全一样，以小鼠mm10 Chromosome1为例，`GenBank: CM000994.2, RefSeq: NC_000067.6, GENCODE: chr1, UCSC: chr1, Ensembl:chr1, ENCODE: chr1`，此外对于随机序列，UCSC、Ensembl、ENCODE会标明染色体号，如`chr1_GL456210_random`，但GENCODE不标明，`GL456210.1`。因此，为了后续分析方便，以及很好的适用一些分析软件（如Juicer），尽量使用UCSC、Ensembl、ENCODE提供的参考基因组文件。
 
 ### 一次hic数据分析过程
 
@@ -414,17 +426,37 @@ multiqc .
 - 运行hic分析流程
 
 ```sh
+#准备参考文件<JuicerDIR>
+mkdir -p references && cd references/mm10
+wget -c https://www.encodeproject.org/files/ENCFF018NEO/@@download/ENCFF018NEO.tar.gz
+wget https://www.encodeproject.org/files/mm10_no_alt.chrom.sizes/@@download/mm10_no_alt.chrom.sizes.tsv
+tar -xzvf ENCFF018NEO.tar.gz -C .
+nano restriction_site_locations.json
+caper run ../../make_restriction_site_locations.wdl -i restriction_site_locations.json --docker
+#run caper<workDir>
 mkdir hic_run && cd hic_run
 nano input.json  #json配置文件
 caper run /home/lxh/HiC_test/hic-pipeline/hic.wdl -i input.json --docker
 ```
 
-JSON文件如下
+JSON文件如下:
+
+restriction_site_locations.json：
 
 ```json
 {
-  "hic.assembly_name": "GRCm38",
-  "hic.chrsz": "/home/lxh/HiC_test/refgenomes/chromsizes/GRCm38.chrom.sizes",
+  "make_restriction_site_locations.reference_fasta": "/home/lxh/HiC_test/hic-pipeline/references/mm10_no_alt_analysis_set_ENCODE.fa",
+  "make_restriction_site_locations.restriction_enzyme": "DpnII",
+  "make_restriction_site_locations.assembly_name": "mm10"
+}
+```
+
+input.json：
+
+```json
+{
+  "hic.assembly_name": "mm10",
+  "hic.chrsz": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_no_alt.chrom.sizes.tsv",
   "hic.fastq": [
     [
       {
@@ -447,11 +479,11 @@ JSON文件如下
       }
     ]
   ],
-  "hic.reference_index": "/home/lxh/HiC_test/refgenomes/indexs/GRCm38/bwaindex/GRCm38.primary_assembly.genome.tar.gz",
+  "hic.reference_index": "/home/lxh/HiC_test/hic-pipeline/references/mm10/ENCFF018NEO.tar.gz",
   "hic.restriction_enzymes": [
     "DpnII"
   ],
-  "hic.restriction_sites": "/home/lxh/HiC_test/refgenomes/enzymesites/juicer/GRCm38_DpnII.txt.gz"
+  "hic.restriction_sites": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_DpnII.txt.gz"
 }
 ```
 

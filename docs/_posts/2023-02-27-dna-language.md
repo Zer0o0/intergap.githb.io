@@ -116,10 +116,24 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 - One-Hot
 
+One-hot方法，将DNA序列直观的表示为0-1的矩阵，如图所示：
+![]({{ '/assets/img/mds/dna_onehot.png' | relative_url }})
 
+[DeepSEA](https://www.nature.com/articles/nmeth.3547)  
+[DeepBind](https://www.nature.com/articles/nbt.3300)  
+[Basset](https://genome.cshlp.org/content/26/7/990.short)
 
-- Embeding
+- Embedding
 
+词向量表示方法，借鉴自然语言处理的思路，先将DNA序列切分为一定长度的k-mer，然后把k-mer的序列片段视为词语，一段序列视为句子，训练词向量模型，可参考[博客](https://jalammar.github.io/illustrated-word2vec/)理解。
+![]({{ '/assets/img/mds/dna_embedding.png' | relative_url }})
+
+[word2vec](https://arxiv.org/pdf/1411.2738.pdf)  
+[Transformer](https://arxiv.org/pdf/1706.03762.pdf)  
+
+[dna2vec](https://arxiv.org/pdf/1701.06279.pdf)  
+[kmer2vec](https://doi.org/10.1089/cmb.2021.0536)  
+[DNABERT](https://doi.org/10.1093/bioinformatics/btab083)  
 
 ---
 
