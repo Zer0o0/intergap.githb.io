@@ -396,7 +396,7 @@ caper run ../make_restriction_site_locations.wdl -i restriction_site_locations.j
 
 ---
 
-**注意**：NCBI-RefSeq、NCBI-GenBank、GENCODE、UCSC、Ensembl、ENCODE各个数据库的参考基因组对染色体的标识并不完全一样，以小鼠mm10 Chromosome1为例，`GenBank: CM000994.2, RefSeq: NC_000067.6, GENCODE: chr1, UCSC: chr1, Ensembl:chr1, ENCODE: chr1`，此外对于随机序列，UCSC、Ensembl、ENCODE会标明染色体号，如`chr1_GL456210_random`，但GENCODE不标明，`GL456210.1`。因此，为了后续分析方便，以及很好的适用一些分析软件（如Juicer），尽量使用UCSC、Ensembl、ENCODE提供的参考基因组文件。
+**注意**：NCBI-RefSeq、NCBI-GenBank、GENCODE、UCSC、Ensembl、ENCODE各个数据库的参考基因组对染色体的标识并不完全一样，以小鼠mm10 Chromosome1为例，`GenBank: CM000994.2, RefSeq: NC_000067.6, GENCODE: chr1, UCSC: chr1, Ensembl: 1, ENCODE: chr1`，此外对于随机序列，UCSC、ENCODE会标明染色体号，如`chr1_GL456210_random`，但GENCODE、Ensembl不会标明，如`GL456210.1`。下载时序列文件和注释文件应来自同一数据库。
 
 ### 一次hic数据分析过程
 
@@ -427,6 +427,7 @@ multiqc .
 
 ```sh
 #准备参考文件<JuicerDIR>
+#Juicer 支持UCSC或者ENCODE的参考序列文件
 mkdir -p references && cd references/mm10
 wget -c https://www.encodeproject.org/files/ENCFF018NEO/@@download/ENCFF018NEO.tar.gz
 wget https://www.encodeproject.org/files/mm10_no_alt.chrom.sizes/@@download/mm10_no_alt.chrom.sizes.tsv

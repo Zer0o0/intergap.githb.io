@@ -8,7 +8,7 @@ tags: [DNA, Computational biology]
 
 [Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid](https://www.nature.com/articles/171737a0)
 
-|||
+|细胞模式图|亚细胞结构|
 |--|--|
 |![Animal cell diagram](https://upload.wikimedia.org/wikipedia/commons/1/11/Animal_Cell.svg)|Components of a typical animal cell: 1.Nucleolus, 2.Nucleus, 3.Ribosome, 4.Vesicle, 5.Rough endoplasmic reticulum, 6.Golgi apparatus, 7.Cytoskeleton, 8.Smooth endoplasmic reticulum, 9.Mitochondrion, 10.Vacuole, 11.Cytosol, 12.Lysosome, 13.Centrosome, 14.Cell membrane|
 
@@ -21,8 +21,9 @@ tags: [DNA, Computational biology]
 [RNA](https://en.wikipedia.org/wiki/RNA)  
 [Protein](https://en.wikipedia.org/wiki/Protein)  
 
-![A ribosome produces a protein using mRNA as template](https://upload.wikimedia.org/wikipedia/commons/b/b1/Ribosome_mRNA_translation_en.svg)
-![3D structure of the protein myoglobin showing turquoise α-helices](https://upload.wikimedia.org/wikipedia/commons/6/60/Myoglobin.png)
+|蛋白形成过程|蛋白3D结构|
+|--|--|
+|![A ribosome produces a protein using mRNA as template](https://upload.wikimedia.org/wikipedia/commons/b/b1/Ribosome_mRNA_translation_en.svg)|![3D structure of the protein myoglobin showing turquoise α-helices](https://upload.wikimedia.org/wikipedia/commons/6/60/Myoglobin.png)|
 
 [Gene](https://en.wikipedia.org/wiki/Gene)  
 [Central dogma](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology)  
@@ -103,7 +104,10 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 - gene features
 
+真核生物基因结构  
 ![Eukaryotic protein-coding gene](https://upload.wikimedia.org/wikipedia/commons/5/54/Gene_structure_eukaryote_2_annotated.svg)
+
+原核生物基因结构
 ![Prokaryotic operon of protein-coding genes](https://upload.wikimedia.org/wikipedia/commons/f/fd/Gene_structure_prokaryote_2_annotated.svg)
 
 - toolkits
@@ -118,6 +122,7 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 One-hot方法，将DNA序列直观的表示为0-1的矩阵，如图所示：
 ![]({{ '/assets/img/mds/dna_onehot.png' | relative_url }})
+矩阵维度为\[4,n\]，n为序列的长度。
 
 [DeepSEA](https://www.nature.com/articles/nmeth.3547)  
 [DeepBind](https://www.nature.com/articles/nbt.3300)  
@@ -125,7 +130,7 @@ One-hot方法，将DNA序列直观的表示为0-1的矩阵，如图所示：
 
 - Embedding
 
-词向量表示方法，借鉴自然语言处理的思路，先将DNA序列切分为一定长度的k-mer，然后把k-mer的序列片段视为词语，一段序列视为句子，训练词向量模型，可参考[博客](https://jalammar.github.io/illustrated-word2vec/)理解。
+词向量表示方法，借鉴自然语言处理的思路，先将DNA序列切分为一定长度的k-mer，然后把k-mer的序列片段视为词语，一段序列视为句子，训练词向量模型，最终的词库大小为4^k个。可参考[博客](https://jalammar.github.io/illustrated-word2vec/)理解。
 ![]({{ '/assets/img/mds/dna_embedding.png' | relative_url }})
 
 [word2vec](https://arxiv.org/pdf/1411.2738.pdf)  
