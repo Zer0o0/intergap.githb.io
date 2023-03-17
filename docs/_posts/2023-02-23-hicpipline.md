@@ -99,6 +99,21 @@ sudo docker run hello-world
 #添加用户进docker组，支持非root使用
 sudo gpasswd -a username docker
 newgrp docker
+docker run hello-world
+
+#GPU 支持(https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installation-guide)
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+      && curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+      && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+            sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+sudo docker run --rm --runtime=nvidia --gpus all nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
+# apt-get install nvidia-container-runtime
+
 ```
 
 ### CUDA and NVIDIA GPU介绍
@@ -128,6 +143,17 @@ docker images
 #encodedcc/hic-pipeline   1.15.1           95c8bf750530   3 months ago    2.21GB
 #encodedcc/hic-pipeline   1.15.1_hiccups   363f736bd618   7 months ago    2.52GB
 #hello-world              latest           feb5d9fea6a5   17 months ago   13.3kB
+
+#启动容器
+docker run -it encodedcc/hic-pipeline:1.15.1_hiccups /bin/bash
+# -i 交互式使用
+# -t 显示终端
+# -v 主机路径:容器路径，实现主机和docker文件的共享，如 -v /home/lxh/Lab/ZheLiu/Hi-C/hic_run/hiccups_run/:/shared_folder
+# --gpus all 将GPU添加到容器
+
+#退出容器
+exit
+
 ```
 
 ---
@@ -255,6 +281,19 @@ hic.wdl的json配置文件内容如下：
 `docker build -t encodedcc/hic-pipeline:1.15.1 .`
 
 3. 注意，*hic.reference_index*提供文件为tar.gz格式，包括参考基因组bwa的index文件及序列文件
+
+4. Hiccups报错，java.lang.UnsatisfiedLinkError: Error while loading native library "JCudaDriver-0.8.0-linux-x86_64"。  
+从[JuicerTools](https://github.com/aidenlab/JuicerTools/tree/master/lib/jcuda)下载libJCudaDriver-linux-x86_64.so库文件，将其命名为libJCudaDriver-0.8.0-linux-x86_64.so，并放在/opt/sos目录下
+`cd /opt/sos`
+`wget https://github.com/aidenlab/JuicerTools/raw/master/lib/jcuda/libJCudaDriver-linux-x86_64.so`  
+`ln -s libJCudaDriver-linux-x86_64.so libJCudaDriver-0.8.0-linux-x86_64.so`  
+`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/sos`  
+`java -jar /opt/scripts/common/juicer_tools.jar hiccups -c 19 inter_30.hic loops`,
+
+5. Error response from daemon: could not select device driver "" with capabilities
+这是由于没有配置好docker运行环境导致的，在container中运行GPU的环境配置方式详见**docker安装步骤**。
+
+6. 配置文件中fastq文件均为统一实验条件下的重复，包括生物学重复和技术从重复；对于不同实验条件下的数据，应分开运行。
 
 #### HiC数据说明
 
@@ -438,8 +477,26 @@ caper run ../../make_restriction_site_locations.wdl -i restriction_site_location
 mkdir hic_run && cd hic_run
 nano input.json  #json配置文件
 caper run /home/lxh/HiC_test/hic-pipeline/hic.wdl -i input.json --docker
-```
+#
+nohup caper run /home/lxh/HiC_test/hic-pipeline/hic.wdl -i input_EKO4d.json --docker >nohup_EKO4d.out 2>&1 &
+nohup caper run /home/lxh/HiC_test/hic-pipeline/hic.wdl -i input_WT4d.json --docker >nohup_WT4d.out 2>&1 &
 
+#hiccups分析|docker容器运行
+cp /home/lxh/Lab/ZheLiu/Hi-C/hic_run/hic/fee97d45-1a06-4a50-94ee-a1db98fbf854/call-add_norm/shard-1/execution/inter_30.hic .
+docker run -it -v /home/lxh/Lab/ZheLiu/Hi-C/hic_run/hic/fee97d45-1a06-4a50-94ee-a1db98fbf854/hiccups/:/shared_folder --gpus all encodedcc/hic-pipeline:1.15.1_hiccups /bin/bash
+nvidia-smi  #GPU信息
+#java -jar /opt/scripts/common/juicer_tools.jar hiccups -m 1024 inter_30.hic loops
+java -jar /opt/scripts/common/juicer_tools.jar hiccups \
+-m 1024 \
+-r 5000,10000,25000,50000,100000 \
+-f .1,.1,.1,.1,.1 \
+-p 4,2,1,1,1 \
+-i 7,5,3,3,3 \
+-t 0.02,1.5,1.75,2,2 \
+-d 20000,20000,50000,50000,50000 \
+inter_30.hic loops_2
+
+```
 JSON文件如下:
 
 restriction_site_locations.json：
@@ -486,6 +543,56 @@ input.json：
   ],
   "hic.restriction_sites": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_DpnII.txt.gz"
 }
+
+#input_EKO4d.json
+{
+  "hic.assembly_name": "mm10",
+  "hic.chrsz": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_no_alt.chrom.sizes.tsv",
+  "hic.fastq": [
+    [
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-1_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-1_R2.fq.gz"
+      },
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-2_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/EKO4d-2_R2.fq.gz"
+      }
+    ]
+  ],
+  "hic.reference_index": "/home/lxh/HiC_test/hic-pipeline/references/mm10/ENCFF018NEO.tar.gz",
+  "hic.restriction_enzymes": [
+    "DpnII"
+  ],
+  "hic.restriction_sites": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_DpnII.txt.gz"
+}
+
+#input_WT4d.json
+{
+  "hic.assembly_name": "mm10",
+  "hic.chrsz": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_no_alt.chrom.sizes.tsv",
+  "hic.fastq": [
+    [
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-1_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-1_R2.fq.gz"
+      },
+      {
+        "read_1": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-2_R1.fq.gz",
+        "read_2": "/home/lxh/Lab/ZheLiu/Hi-C/WT4d-2_R2.fq.gz"
+      }
+    ]
+  ],
+  "hic.reference_index": "/home/lxh/HiC_test/hic-pipeline/references/mm10/ENCFF018NEO.tar.gz",
+  "hic.restriction_enzymes": [
+    "DpnII"
+  ],
+  "hic.restriction_sites": "/home/lxh/HiC_test/hic-pipeline/references/mm10/mm10_DpnII.txt.gz"
+}
+
 ```
 
 - 下游分析和可视化
+
+[HiCExplorer](https://github.com/deeptools/HiCExplorer),Set of programs to process, analyze and visualize Hi-C and cHi-C data.
+![](https://github.com/deeptools/HiCExplorer/raw/master/docs/images/hicex3.png)

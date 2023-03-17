@@ -26,6 +26,11 @@ tags: [DNA, Computational biology]
 |![A ribosome produces a protein using mRNA as template](https://upload.wikimedia.org/wikipedia/commons/b/b1/Ribosome_mRNA_translation_en.svg)|![3D structure of the protein myoglobin showing turquoise α-helices](https://upload.wikimedia.org/wikipedia/commons/6/60/Myoglobin.png)|
 
 [Gene](https://en.wikipedia.org/wiki/Gene)  
+[Enhancer](https://en.wikipedia.org/wiki/Enhancer_(genetics))  
+[Promoter](https://en.wikipedia.org/wiki/Promoter_(genetics))  
+
+![](https://upload.wikimedia.org/wikipedia/commons/d/d7/Regulation_of_transcription_in_mammals.jpg)
+
 [Central dogma](https://en.wikipedia.org/wiki/Central_dogma_of_molecular_biology)  
 
 ![Information flow in biological systems](https://upload.wikimedia.org/wikipedia/commons/d/dd/Extended_Central_Dogma_with_Enzymes.jpg)
@@ -73,7 +78,8 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 基因组注释统计信息：  
 人类（Homo sapiens）：[Human assembly and gene annotation](https://asia.ensembl.org/Homo_sapiens/Info/Annotation)  
-小鼠（Mus musculus）：[Mouse assembly and gene annotation](https://asia.ensembl.org/Mus_musculus/Info/Annotation)
+小鼠（Mus musculus）：[Mouse assembly and gene annotation](https://asia.ensembl.org/Mus_musculus/Info/Annotation)  
+![]({{ '/assets/img/mds/GRCh37_stat.png' | relative_url }})
 
 ### 数据表示方法
 
@@ -122,23 +128,15 @@ ref: [The dynamics of chromatin architecture in brain development and function. 
 
 One-hot方法，将DNA序列直观的表示为0-1的矩阵，如图所示：
 ![]({{ '/assets/img/mds/dna_onehot.png' | relative_url }})
-矩阵维度为\[4,n\]，n为序列的长度。
 
-[DeepSEA](https://www.nature.com/articles/nmeth.3547)  
-[DeepBind](https://www.nature.com/articles/nbt.3300)  
-[Basset](https://genome.cshlp.org/content/26/7/990.short)
+矩阵维度为\[4,n\]，n为序列的长度。代表的模型有[DeepSEA](https://www.nature.com/articles/nmeth.3547)、[DeepBind](https://www.nature.com/articles/nbt.3300)和[Basset](https://genome.cshlp.org/content/26/7/990.short)等。
 
 - Embedding
 
-词向量表示方法，借鉴自然语言处理的思路，先将DNA序列切分为一定长度的k-mer，然后把k-mer的序列片段视为词语，一段序列视为句子，训练词向量模型，最终的词库大小为4^k个。可参考[博客](https://jalammar.github.io/illustrated-word2vec/)理解。
+自然语言处理中的架构如[word2vec](https://arxiv.org/pdf/1411.2738.pdf)、[Transformer](https://arxiv.org/pdf/1706.03762.pdf)等均采用了词向量表示方法，可参考[博客](https://jalammar.github.io/illustrated-word2vec/)理解。借鉴NLP的思路，先将DNA序列切分为一定长度的k-mer，然后把k-mer的序列片段视为词语，一段序列视为句子，训练词向量模型，最终的词库大小为4^k个。
 ![]({{ '/assets/img/mds/dna_embedding.png' | relative_url }})
 
-[word2vec](https://arxiv.org/pdf/1411.2738.pdf)  
-[Transformer](https://arxiv.org/pdf/1706.03762.pdf)  
-
-[dna2vec](https://arxiv.org/pdf/1701.06279.pdf)  
-[kmer2vec](https://doi.org/10.1089/cmb.2021.0536)  
-[DNABERT](https://doi.org/10.1093/bioinformatics/btab083)  
+如[dna2vec](https://arxiv.org/pdf/1701.06279.pdf)、[kmer2vec](https://doi.org/10.1089/cmb.2021.0536)和[DNABERT](https://doi.org/10.1093/bioinformatics/btab083)等模型均采用这种方法表示基因组序列。
 
 ---
 
